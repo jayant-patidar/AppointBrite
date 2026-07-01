@@ -74,20 +74,12 @@ export default function Header() {
             '&:hover': { transform: 'scale(1.02)' }
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              fontFamily: '"Outfit", sans-serif',
-              background: 'linear-gradient(135deg, #2563EB 0%, #a855f7 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.5px'
-            }}
-          >
-            AppointBrite
-          </Typography>
+          <Box
+            component="img"
+            src="/headerlogo.png"
+            alt="AppointBrite"
+            sx={{ height: 40, width: 'auto' }}
+          />
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2, md: 3 } }}>
