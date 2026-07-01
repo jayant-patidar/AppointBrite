@@ -10,7 +10,7 @@ const setAuthCookies = (res: Response, refreshToken: string) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 };
