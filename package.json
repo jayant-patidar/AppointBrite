@@ -1,0 +1,23 @@
+{
+  "name": "appointbrite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AppointBrite — Two-sided marketplace for booking local services",
+  "workspaces": [
+    "AppointBrite Client",
+    "AppointBrite Server"
+  ],
+  "scripts": {
+    "dev:client": "npm run dev --workspace=\"AppointBrite Client\"",
+    "dev:server": "npm run dev --workspace=\"AppointBrite Server\"",
+    "build:client": "npm run build --workspace=\"AppointBrite Client\"",
+    "build:server": "npm run build --workspace=\"AppointBrite Server\"",
+    "lint:client": "npm run lint --workspace=\"AppointBrite Client\"",
+    "lint:server": "npm run lint --workspace=\"AppointBrite Server\"",
+    "lint": "npm run lint:client && npm run lint:server",
+    "build": "npm run build:client && npm run build:server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

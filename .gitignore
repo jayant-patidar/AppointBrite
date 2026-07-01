@@ -1,0 +1,84 @@
+# ============================================
+# AppointBrite — Root .gitignore
+# ============================================
+
+# ── Dependencies ──────────────────────────────
+node_modules/
+
+# ── Build Output ──────────────────────────────
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ── Environment Variables / Secrets ───────────
+# NEVER commit real .env files — use .env.example
+.env
+.env.*
+!.env.example
+
+# ── IDE / Editor ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── OS Generated Files ───────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
+
+# ── Logs ──────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Testing / Coverage ───────────────────────
+coverage/
+.nyc_output/
+
+# ── Docker ────────────────────────────────────
+.docker/
+docker-compose.override.yml
+
+# ── Secrets & Certificates ───────────────────
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+*.jks
+
+# ── Package Manager Extras ────────────────────
+.pnp
+.pnp.js
+.yarn/
+*.tgz
+
+# ── Caches ────────────────────────────────────
+.cache/
+.parcel-cache/
+.eslintcache
+.prettiercache
+
+# ── AI / Agent Tooling ───────────────────────
+.agents/
+.gemini/
+.cursor/
+.copilot/
+
+# ── Miscellaneous ────────────────────────────
+*.local
+dist-ssr/
