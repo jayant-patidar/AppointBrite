@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Box, TextField, Button, CircularProgress, Alert } from '@mui/material';
+import { Box, TextField, Button, CircularProgress, Alert, InputAdornment } from '@mui/material';
+import MailOutlineIcon from '@mui/icons-material/MailOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -43,9 +45,9 @@ export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
       dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
       
       if (response.user.role === 'BUSINESS_OWNER' || response.user.role === 'STAFF') {
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } else {
-        navigate('/search');
+        navigate('/search', { replace: true });
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred during login.');
@@ -69,6 +71,15 @@ export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
             fullWidth
             error={!!errors.email}
             helperText={errors.email?.message}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailOutlineIcon color="action" />
+                  </InputAdornment>
+                ),
+              }
+            }}
           />
         )}
       />
@@ -84,6 +95,15 @@ export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
             fullWidth
             error={!!errors.password}
             helperText={errors.password?.message}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlinedIcon color="action" />
+                  </InputAdornment>
+                ),
+              }
+            }}
           />
         )}
       />
@@ -94,9 +114,9 @@ export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
         size="large" 
         fullWidth 
         disabled={isSubmitting}
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, py: 1.5, fontSize: '1.1rem' }}
       >
-        {isSubmitting ? <CircularProgress size={24} /> : 'Sign In'}
+        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
       </Button>
     </Box>
   );

@@ -78,6 +78,15 @@ export class AuthService {
       throw new UnauthorizedError('Invalid or expired refresh token');
     }
   }
+
+  async getUserById(userId: string) {
+    const user = await User.findById(userId);
+    if (!user) throw new UnauthorizedError('User not found');
+    
+    const userResponse = user.toObject();
+    delete (userResponse as any).passwordHash;
+    return userResponse;
+  }
 }
 
 export const authService = new AuthService();

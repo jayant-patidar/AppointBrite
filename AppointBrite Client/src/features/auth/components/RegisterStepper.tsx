@@ -9,8 +9,6 @@ import { useForm, Controller, FormProvider, useFormContext } from 'react-hook-fo
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '@/store/slices/authSlice';
 import { authApi } from '@/api/auth';
 
 const registerSchema = z.object({
@@ -174,7 +172,6 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema as any),
@@ -200,6 +197,7 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
   const handleNext = async () => {
     let fieldsToValidate: (keyof RegisterFormValues)[] = [];
     if (activeStep === 0) fieldsToValidate = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
+    if (activeStep === 1) fieldsToValidate = ['phoneNumber', 'dateOfBirth', 'gender'];
 
     const isValid = await trigger(fieldsToValidate);
     if (isValid) {
@@ -212,6 +210,11 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
   };
 
   const onSubmit = async (data: RegisterFormValues) => {
+    if (activeStep !== steps.length - 1) {
+      handleNext();
+      return;
+    }
+
     setServerError('');
     setIsSubmitting(true);
     try {
@@ -226,14 +229,10 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
       }
       delete payload.confirmPassword;
 
-      const response = await authApi.register(payload);
-      dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
+      await authApi.register(payload);
       
-      if (response.user.role === 'BUSINESS_OWNER') {
-        navigate('/dashboard');
-      } else {
-        navigate('/search');
-      }
+      // Registration successful, take them to login page to log in officially
+      navigate('/login');
     } catch (error: any) {
       setServerError(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -265,20 +264,21 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
 
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 4 }}>
             <Button
+              type="button"
               color="inherit"
               disabled={activeStep === 0 || isSubmitting}
               onClick={handleBack}
-              sx={{ mr: 1 }}
+              sx={{ mr: 1, py: 1.5, px: 3, borderRadius: 999 }}
             >
               Back
             </Button>
             <Box sx={{ flex: '1 1 auto' }} />
             {activeStep === steps.length - 1 ? (
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
-                {isSubmitting ? <CircularProgress size={24} /> : 'Complete'}
+              <Button key="btn-submit" type="submit" variant="contained" disabled={isSubmitting} sx={{ py: 1.5, px: 4, borderRadius: 999 }}>
+                {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Complete'}
               </Button>
             ) : (
-              <Button onClick={handleNext} variant="contained">
+              <Button key="btn-next" type="button" onClick={handleNext} variant="contained" sx={{ py: 1.5, px: 4, borderRadius: 999 }}>
                 Next
               </Button>
             )}

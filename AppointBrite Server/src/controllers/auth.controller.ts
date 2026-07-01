@@ -58,8 +58,11 @@ export class AuthController {
   }
 
   async getMe(req: Request, res: Response) {
-    // req.user is set by auth middleware
-    sendSuccess(res, req.user);
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    const user = await authService.getUserById(req.user.userId);
+    sendSuccess(res, user);
   }
 
   async logout(req: Request, res: Response) {
