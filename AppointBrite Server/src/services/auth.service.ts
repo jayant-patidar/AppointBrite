@@ -40,10 +40,14 @@ export class AuthService {
     return { user: userResponse, ...tokens };
   }
 
-  async login(email: string, passwordPlain: string) {
+  async login(email: string, passwordPlain: string, expectedRoles?: string[]) {
     const user = await User.findOne({ email }).select('+passwordHash');
     if (!user) {
       throw new UnauthorizedError('Invalid email or password');
+    }
+
+    if (expectedRoles && !expectedRoles.includes(user.role)) {
+      throw new UnauthorizedError(`You are registered as a ${user.role}. Please log in via the correct tab.`);
     }
 
     const isMatch = await comparePassword(passwordPlain, user.passwordHash);
@@ -57,6 +61,22 @@ export class AuthService {
     delete (userResponse as any).passwordHash;
 
     return { user: userResponse, ...tokens };
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as any;
+      const user = await User.findById(decoded.userId);
+      if (!user) throw new UnauthorizedError('User no longer exists');
+
+      const tokens = this.generateTokens(user);
+      const userResponse = user.toObject();
+      delete (userResponse as any).passwordHash;
+
+      return { user: userResponse, ...tokens };
+    } catch (error) {
+      throw new UnauthorizedError('Invalid or expired refresh token');
+    }
   }
 }
 

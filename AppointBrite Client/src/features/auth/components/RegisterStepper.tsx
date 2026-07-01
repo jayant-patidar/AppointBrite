@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { 
   Box, Stepper, Step, StepLabel, Button, Typography, 
-  TextField, RadioGroup, FormControlLabel, Radio, 
-  FormControl, FormLabel, Checkbox, Select, MenuItem, InputLabel,
-  Paper, CircularProgress, Alert
+  TextField, FormControlLabel, 
+  FormControl, Checkbox, Select, MenuItem, InputLabel,
+  CircularProgress, Alert
 } from '@mui/material';
 import { useForm, Controller, FormProvider, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '@/api/endpoints/auth.api';
-import { ROUTES } from '@/config/routes';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '@/store/slices/authSlice';
+import { authApi } from '@/api/auth';
 
 const registerSchema = z.object({
   role: z.enum(['CUSTOMER', 'BUSINESS_OWNER']),
@@ -41,32 +42,7 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const steps = ['Account Type', 'Basic Details', 'Personal Info', 'Preferences'];
-
-const Step1 = () => {
-  const { control } = useFormContext<RegisterFormValues>();
-  return (
-    <Box sx={{ mt: 2 }}>
-      <FormControl component="fieldset" fullWidth>
-        <FormLabel component="legend">What brings you to AppointBrite?</FormLabel>
-        <Controller
-          name="role"
-          control={control}
-          render={({ field }) => (
-            <RadioGroup {...field} sx={{ mt: 2, gap: 2 }}>
-              <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'center', transition: 'border 0.2s', '&:hover': { borderColor: 'primary.main' } }}>
-                <FormControlLabel value="CUSTOMER" control={<Radio />} label="I want to book appointments" sx={{ flexGrow: 1, m: 0 }} />
-              </Paper>
-              <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'center', transition: 'border 0.2s', '&:hover': { borderColor: 'primary.main' } }}>
-                <FormControlLabel value="BUSINESS_OWNER" control={<Radio />} label="I want to manage my business" sx={{ flexGrow: 1, m: 0 }} />
-              </Paper>
-            </RadioGroup>
-          )}
-        />
-      </FormControl>
-    </Box>
-  );
-};
+const steps = ['Basic Details', 'Personal Info', 'Preferences'];
 
 const Step2 = () => {
   const { control, formState: { errors } } = useFormContext<RegisterFormValues>();
@@ -189,16 +165,21 @@ const Step4 = () => {
   );
 };
 
-export default function RegisterStepper() {
+interface RegisterStepperProps {
+  portal?: 'CUSTOMER' | 'BUSINESS';
+}
+
+export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepperProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema as any),
     defaultValues: {
-      role: 'CUSTOMER',
+      role: portal === 'BUSINESS' ? 'BUSINESS_OWNER' : 'CUSTOMER',
       firstName: '',
       lastName: '',
       email: '',
@@ -218,8 +199,7 @@ export default function RegisterStepper() {
 
   const handleNext = async () => {
     let fieldsToValidate: (keyof RegisterFormValues)[] = [];
-    if (activeStep === 0) fieldsToValidate = ['role'];
-    if (activeStep === 1) fieldsToValidate = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
+    if (activeStep === 0) fieldsToValidate = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
 
     const isValid = await trigger(fieldsToValidate);
     if (isValid) {
@@ -246,8 +226,14 @@ export default function RegisterStepper() {
       }
       delete payload.confirmPassword;
 
-      await authApi.register(payload);
-      navigate(ROUTES.LOGIN); 
+      const response = await authApi.register(payload);
+      dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
+      
+      if (response.user.role === 'BUSINESS_OWNER') {
+        navigate('/dashboard');
+      } else {
+        navigate('/search');
+      }
     } catch (error: any) {
       setServerError(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -273,10 +259,9 @@ export default function RegisterStepper() {
 
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          {activeStep === 0 && <Step1 />}
-          {activeStep === 1 && <Step2 />}
-          {activeStep === 2 && <Step3 />}
-          {activeStep === 3 && <Step4 />}
+          {activeStep === 0 && <Step2 />}
+          {activeStep === 1 && <Step3 />}
+          {activeStep === 2 && <Step4 />}
 
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 4 }}>
             <Button

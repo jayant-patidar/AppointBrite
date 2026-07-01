@@ -1,15 +1,17 @@
 /**
  * App.tsx — Root component with all providers and routing.
  */
-import { useMemo, lazy, Suspense } from 'react';
+import { useMemo, lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider as ReduxProvider, useSelector } from 'react-redux';
+import { Provider as ReduxProvider, useSelector, useDispatch } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { store, type RootState } from '@/store';
 import { queryClient } from '@/api/queryClient';
 import { lightTheme, darkTheme } from '@/styles/theme';
 import { ROUTES } from '@/config/routes';
+import { authApi } from '@/api/auth';
+import { setUser } from '@/store/slices/authSlice';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
@@ -47,10 +49,17 @@ const CategoryManagementPage = lazy(() => import('@/features/admin/pages/Categor
 
 function AppRoutes() {
   const themeMode = useSelector((state: RootState) => state.ui.themeMode);
+  const dispatch = useDispatch();
   const theme = useMemo(
     () => (themeMode === 'dark' ? darkTheme : lightTheme),
     [themeMode],
   );
+
+  useEffect(() => {
+    authApi.me()
+      .then((user) => dispatch(setUser(user)))
+      .catch(() => { /* silent fail, user is not logged in */ });
+  }, [dispatch]);
 
   return (
     <ThemeProvider theme={theme}>

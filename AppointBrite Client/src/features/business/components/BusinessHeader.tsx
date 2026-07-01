@@ -121,14 +121,14 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
               </Typography>
             </Box>
           </Box>
+
+          {/* Description */}
+          <Box sx={{ mt: 2, textAlign: { xs: 'center', sm: 'left' } }}>
+            <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, maxWidth: 800, mx: { xs: 'auto', sm: 0 } }}>
+              {business.description}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
-      
-      {/* Description */}
-      <Box sx={{ mt: 4, px: { xs: 2, md: 4 } }}>
-        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-          {business.description}
-        </Typography>
       </Box>
     </Box>
   );

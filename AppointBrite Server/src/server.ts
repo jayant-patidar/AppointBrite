@@ -7,6 +7,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import connectDB from './config/database';
 import { setupSocket } from './config/socket';
@@ -24,6 +25,7 @@ app.use(helmet());
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ── Health Check ──
 app.get('/api/v1/health', (_req, res) => {

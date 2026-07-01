@@ -12,6 +12,8 @@ const router = Router();
 
 router.post('/register', validate(registerSchema), asyncHandler(authController.register));
 router.post('/login', validate(loginSchema), asyncHandler(authController.login));
+router.post('/logout', asyncHandler(authController.logout));
+router.post('/refresh', asyncHandler(authController.refresh));
 router.get('/me', authenticate, asyncHandler(authController.getMe));
 
 export const authRouter = router;

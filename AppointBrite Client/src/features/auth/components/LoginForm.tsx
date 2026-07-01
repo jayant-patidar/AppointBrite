@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
-import type { User } from '@/types/user.types';
+import { authApi } from '@/api/auth';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -15,20 +15,11 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const MOCK_USER: User = {
-  _id: 'mock-user-001',
-  email: 'jane.doe@example.com',
-  firstName: 'Jane',
-  lastName: 'Doe',
-  phoneNumber: '+1 (555) 123-4567',
-  role: 'CUSTOMER',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
+interface LoginFormProps {
+  portal?: 'CUSTOMER' | 'BUSINESS';
+}
 
-const MOCK_TOKEN = 'mock-jwt-token-abc123';
-
-export default function LoginForm() {
+export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
@@ -39,22 +30,25 @@ export default function LoginForm() {
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = async (_data: LoginFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     setError('');
     setIsSubmitting(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const response = await authApi.login({ 
+        email: data.email, 
+        password: data.password, 
+        portal 
+      });
       
-      // Mock Login Process
-      // For now, regardless of input, we log in the mock user
-      // Optionally we could verify email matches something, but keeping current mock flow
-      dispatch(setCredentials({ user: MOCK_USER, accessToken: MOCK_TOKEN }));
+      dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
       
-      // Navigate to home or dashboard
-      navigate('/');
+      if (response.user.role === 'BUSINESS_OWNER' || response.user.role === 'STAFF') {
+        navigate('/dashboard');
+      } else {
+        navigate('/search');
+      }
     } catch (err: any) {
-      setError('An error occurred during login.');
+      setError(err.response?.data?.message || 'An error occurred during login.');
     } finally {
       setIsSubmitting(false);
     }

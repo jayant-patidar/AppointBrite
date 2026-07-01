@@ -19,13 +19,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
 import { toggleTheme } from '@/store/slices/uiSlice';
 import { logout } from '@/store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
+import { authApi } from '@/api/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '@/config/routes';
 
 
 export default function Header() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const themeMode = useSelector((state: RootState) => state.ui.themeMode);
   const { user } = useAuth();
 
@@ -33,9 +36,17 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
-  const handleLogout = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    handleMenuClose();
+    try {
+      await authApi.logout();
+    } catch (e) { /* ignore error on logout */ }
     dispatch(logout());
+    navigate(ROUTES.LOGIN);
   };
 
   return (
