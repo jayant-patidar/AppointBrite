@@ -67,7 +67,7 @@ export default function SearchPage() {
               WebkitTextFillColor: 'transparent'
             }}
           >
-            Discover Premium Local Services
+            Book Appointments & Reservations
           </Typography>
           <Typography 
             variant="h6" 
@@ -80,7 +80,7 @@ export default function SearchPage() {
               lineHeight: 1.6
             }}
           >
-            Find and book appointments with the best professionals in your area. Elevate your everyday with curated experiences.
+            Instantly book appointments or make reservations with top-rated local businesses near you. Your next experience is just a tap away.
           </Typography>
           
           <Box sx={{ maxWidth: '700px', mx: 'auto', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))' }}>

@@ -26,19 +26,21 @@ export default function SearchBar({ value, onChange, onSearch }: SearchBarProps)
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           '& fieldset': { border: 'none' },
         }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="action" />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={onSearch} color="primary">
-                <SearchIcon />
-              </IconButton>
-            </InputAdornment>
-          )
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={onSearch} color="primary">
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            )
+          }
         }}
       />
     </Box>

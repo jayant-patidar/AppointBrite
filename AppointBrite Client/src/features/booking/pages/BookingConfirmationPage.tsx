@@ -16,11 +16,11 @@ export default function BookingConfirmationPage() {
         Booking Confirmed!
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 4 }}>
-        Your appointment has been successfully booked. You'll receive a confirmation email shortly.
+        Your appointment or reservation has been successfully booked. You'll receive a confirmation email shortly.
       </Typography>
       {/* TODO: Implement ConfettiAnimation */}
       <Button variant="contained" size="large" onClick={() => navigate(ROUTES.CUSTOMER.BOOKINGS)}>
-        View My Bookings
+        View My Bookings & Reservations
       </Button>
     </Container>
   );

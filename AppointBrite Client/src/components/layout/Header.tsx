@@ -18,25 +18,11 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
 import { toggleTheme } from '@/store/slices/uiSlice';
-import { setCredentials, logout } from '@/store/slices/authSlice';
+import { logout } from '@/store/slices/authSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
-import type { User } from '@/types/user.types';
 
-/** Dummy user used for mock login */
-const MOCK_USER: User = {
-  _id: 'mock-user-001',
-  email: 'jane.doe@example.com',
-  firstName: 'Jane',
-  lastName: 'Doe',
-  phoneNumber: '+1 (555) 123-4567',
-  role: 'CUSTOMER',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
-const MOCK_TOKEN = 'mock-jwt-token-abc123';
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -46,10 +32,6 @@ export default function Header() {
   // Menu anchor for avatar dropdown
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
-
-  const handleMockLogin = () => {
-    dispatch(setCredentials({ user: MOCK_USER, accessToken: MOCK_TOKEN }));
-  };
 
   const handleLogout = () => {
     setAnchorEl(null);
@@ -296,7 +278,8 @@ export default function Header() {
             </>
           ) : (
             <Button
-              onClick={handleMockLogin}
+              component={Link}
+              to={ROUTES.LOGIN}
               variant="contained"
               color="primary"
               sx={{ 

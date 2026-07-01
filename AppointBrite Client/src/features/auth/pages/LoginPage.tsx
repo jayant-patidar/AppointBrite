@@ -1,7 +1,10 @@
 /**
  * LoginPage — user authentication page.
  */
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Link as MuiLink } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
+import LoginForm from '../components/LoginForm';
 
 export default function LoginPage() {
   return (
@@ -13,7 +16,17 @@ export default function LoginPage() {
         <Typography color="text.secondary" sx={{ mb: 4 }}>
           Sign in to your AppointBrite account
         </Typography>
-        {/* TODO: Implement LoginForm component */}
+
+        <LoginForm />
+        
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Don't have an account?{' '}
+            <MuiLink component={Link} to={ROUTES.REGISTER} sx={{ fontWeight: 600 }}>
+              Sign up
+            </MuiLink>
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

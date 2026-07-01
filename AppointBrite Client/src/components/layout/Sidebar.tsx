@@ -30,7 +30,7 @@ interface SidebarProps {
 const menuItems = [
   { label: 'Overview', icon: <DashboardIcon />, path: ROUTES.DASHBOARD.OVERVIEW },
   { label: 'Calendar', icon: <CalendarMonthIcon />, path: ROUTES.DASHBOARD.CALENDAR },
-  { label: 'Bookings', icon: <BookOnlineIcon />, path: ROUTES.DASHBOARD.BOOKINGS },
+  { label: 'Bookings & Reservations', icon: <BookOnlineIcon />, path: ROUTES.DASHBOARD.BOOKINGS },
   { label: 'Services', icon: <MiscellaneousServicesIcon />, path: ROUTES.DASHBOARD.SERVICES },
   { label: 'Staff', icon: <PeopleIcon />, path: ROUTES.DASHBOARD.STAFF },
   { label: 'Customers', icon: <PeopleIcon />, path: ROUTES.DASHBOARD.CUSTOMERS },

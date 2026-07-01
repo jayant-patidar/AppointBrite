@@ -4,6 +4,8 @@
 import axiosInstance from '@/api/axiosInstance';
 import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
 import type { Business } from '@/types/business.types';
+import type { Service } from '@/types/service.types';
+import type { Review } from '@/types/review.types';
 
 interface SearchParams {
   q?: string;
@@ -34,6 +36,16 @@ export const businessesApi = {
 
   getById: async (id: string): Promise<ApiResponse<Business>> => {
     const { data } = await axiosInstance.get(`/businesses/${id}`);
+    return data;
+  },
+
+  getServices: async (id: string): Promise<ApiResponse<Service[]>> => {
+    const { data } = await axiosInstance.get(`/businesses/${id}/services`);
+    return data;
+  },
+
+  getReviews: async (id: string): Promise<ApiResponse<Review[]>> => {
+    const { data } = await axiosInstance.get(`/businesses/${id}/reviews`);
     return data;
   },
 

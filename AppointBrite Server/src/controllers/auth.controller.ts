@@ -7,7 +7,10 @@ import { sendSuccess } from '../utils/apiResponse';
 
 export class AuthController {
   async register(req: Request, res: Response) {
-    const { firstName, lastName, email, password, role } = req.body as any;
+    const { 
+      firstName, lastName, email, password, role, 
+      phoneNumber, dateOfBirth, gender, address, preferences, timezone 
+    } = req.body as any;
 
     const result = await authService.register({
       firstName,
@@ -15,6 +18,12 @@ export class AuthController {
       email,
       passwordHash: password, // mapped to plain text here, hashed in service
       role,
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      address,
+      preferences,
+      timezone
     });
 
     sendSuccess(res, result, 'Registration successful', 201);

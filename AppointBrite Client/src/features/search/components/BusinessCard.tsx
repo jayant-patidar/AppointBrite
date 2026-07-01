@@ -1,5 +1,6 @@
 import { Card, CardMedia, CardContent, Typography, Box, Rating, Chip, alpha, useTheme } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { useNavigate } from 'react-router-dom';
 import type { Business } from '@/types/business.types';
 
 interface BusinessCardProps {
@@ -8,6 +9,7 @@ interface BusinessCardProps {
 
 export default function BusinessCard({ business }: BusinessCardProps) {
   const theme = useTheme();
+  const navigate = useNavigate();
   // Use a nice unsplash fallback if media gallery is empty
   const defaultImage = 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&w=600&q=80';
   const imageUrl = business.mediaGallery && business.mediaGallery.length > 0 
@@ -16,12 +18,14 @@ export default function BusinessCard({ business }: BusinessCardProps) {
 
   return (
     <Card 
+      onClick={() => navigate(`/business/${business._id}`)}
       sx={{ 
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden',
+        cursor: 'pointer',
         // Make sure image zooms without scaling the card too much, the card itself scales slightly due to theme
         '&:hover .MuiCardMedia-root': {
           transform: 'scale(1.08)',

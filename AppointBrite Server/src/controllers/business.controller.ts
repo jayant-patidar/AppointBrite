@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { Business } from '../models/business.model';
+import { Service } from '../models/service.model';
+import { Review } from '../models/review.model';
 
 /**
  * @route   GET /api/v1/businesses
@@ -50,5 +52,39 @@ export const searchBusinesses = async (req: Request, res: Response): Promise<voi
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error fetching businesses' });
+  }
+};
+
+export const getBusinessById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const business = await Business.findById(req.params.id).lean();
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: business });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error fetching business' });
+  }
+};
+
+export const getBusinessServices = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const services = await Service.find({ businessId: req.params.id, isActive: true }).lean();
+    res.status(200).json({ success: true, data: services });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error fetching services' });
+  }
+};
+
+export const getBusinessReviews = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const reviews = await Review.find({ businessId: req.params.id })
+      .populate('customerId', 'firstName lastName')
+      .sort({ createdAt: -1 })
+      .lean();
+    res.status(200).json({ success: true, data: reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error fetching reviews' });
   }
 };

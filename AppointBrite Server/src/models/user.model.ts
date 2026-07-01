@@ -13,6 +13,20 @@ export interface IUser extends Document {
   phoneNumber?: string;
   role: UserRole;
   profileImage?: string;
+  dateOfBirth?: Date;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+  preferences?: {
+    marketingOptIn: boolean;
+    preferredCommunication: 'EMAIL' | 'SMS' | 'BOTH';
+  };
+  timezone?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +44,27 @@ const userSchema = new Schema<IUser>(
       default: 'CUSTOMER',
     },
     profileImage: { type: String },
+    dateOfBirth: { type: Date },
+    gender: {
+      type: String,
+      enum: ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'],
+    },
+    address: {
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zipCode: { type: String },
+      country: { type: String },
+    },
+    preferences: {
+      marketingOptIn: { type: Boolean, default: false },
+      preferredCommunication: {
+        type: String,
+        enum: ['EMAIL', 'SMS', 'BOTH'],
+        default: 'EMAIL',
+      },
+    },
+    timezone: { type: String },
   },
   { timestamps: true },
 );

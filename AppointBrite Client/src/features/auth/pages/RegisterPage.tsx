@@ -1,7 +1,10 @@
 /**
  * RegisterPage — user registration page.
  */
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Link as MuiLink } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
+import RegisterStepper from '../components/RegisterStepper';
 
 export default function RegisterPage() {
   return (
@@ -11,9 +14,19 @@ export default function RegisterPage() {
           Create your account
         </Typography>
         <Typography color="text.secondary" sx={{ mb: 4 }}>
-          Join AppointBrite as a customer or business owner
+          Join AppointBrite to book appointments, make reservations, or grow your business
         </Typography>
-        {/* TODO: Implement RegisterForm component */}
+        {/* Registration Form Stepper */}
+        <RegisterStepper />
+
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Already have an account?{' '}
+            <MuiLink component={Link} to={ROUTES.LOGIN} sx={{ fontWeight: 600 }}>
+              Sign in
+            </MuiLink>
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

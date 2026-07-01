@@ -16,6 +16,21 @@ interface RegisterPayload {
   email: string;
   password: string;
   role: 'CUSTOMER' | 'BUSINESS_OWNER';
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+  preferences?: {
+    marketingOptIn: boolean;
+    preferredCommunication: string;
+  };
+  timezone?: string;
 }
 
 interface AuthResponse {
