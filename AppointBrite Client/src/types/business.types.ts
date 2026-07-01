@@ -49,6 +49,7 @@ export interface Business {
   rating: BusinessRating;
   subscriptionTier: SubscriptionTier;
   stripeAccountId?: string;
+  maxAdvanceBookingDays: number;
   isActive: boolean;
   createdAt: string;
 }

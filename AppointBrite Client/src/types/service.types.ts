@@ -10,5 +10,7 @@ export interface Service {
   price: number;
   durationMinutes: number;
   bufferMinutes: number;
+  capacity: number;
+  requiresApproval: boolean;
   isActive: boolean;
 }

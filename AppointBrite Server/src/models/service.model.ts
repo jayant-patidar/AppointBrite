@@ -10,6 +10,8 @@ export interface IService extends Document {
   price: number;
   durationMinutes: number;
   bufferMinutes: number;
+  capacity: number;
+  requiresApproval: boolean;
   isActive: boolean;
 }
 
@@ -21,6 +23,8 @@ const serviceSchema = new Schema<IService>(
     price: { type: Number, required: true, min: 0 },
     durationMinutes: { type: Number, required: true, min: 1 },
     bufferMinutes: { type: Number, default: 0 },
+    capacity: { type: Number, default: 1, min: 1 },
+    requiresApproval: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },

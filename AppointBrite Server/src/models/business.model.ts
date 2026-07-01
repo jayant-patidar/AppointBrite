@@ -30,6 +30,7 @@ export interface IBusiness extends Document {
   rating: { average: number; count: number };
   subscriptionTier: SubscriptionTier;
   stripeAccountId?: string;
+  maxAdvanceBookingDays: number;
   isActive: boolean;
   createdAt: Date;
 }
@@ -70,6 +71,7 @@ const businessSchema = new Schema<IBusiness>(
       default: 'FREE',
     },
     stripeAccountId: String,
+    maxAdvanceBookingDays: { type: Number, default: 30, min: 1 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },
