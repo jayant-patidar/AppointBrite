@@ -14,7 +14,7 @@ export default function CustomerLayout() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {!isMobile && <Header />}
+      <Header />
 
       <Box
         component="main"

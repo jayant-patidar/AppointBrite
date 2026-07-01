@@ -16,7 +16,7 @@ export default function StickyBookingWidget({ businessId, businessName }: Sticky
       sx={{
         position: { xs: 'fixed', md: 'sticky' },
         top: { md: 100 },
-        bottom: { xs: 0, md: 'auto' },
+        bottom: { xs: 72, md: 'auto' },
         left: { xs: 0, md: 'auto' },
         right: { xs: 0, md: 'auto' },
         width: '100%',

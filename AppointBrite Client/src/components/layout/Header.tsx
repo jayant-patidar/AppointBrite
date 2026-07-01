@@ -83,119 +83,121 @@ export default function Header() {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2, md: 3 } }}>
-          {/* — Labeled nav link helper — */}
-          {/* Search */}
-          <Box
-            component={Link}
-            to={ROUTES.SEARCH}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textDecoration: 'none',
-              color: 'text.secondary',
-              px: 1,
-              py: 0.5,
-              borderRadius: 2,
-              transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-              '&:hover': {
-                color: 'primary.main',
-                bgcolor: 'action.hover',
-                transform: 'translateY(-2px)',
-              },
-            }}
-          >
-            <SearchIcon sx={{ fontSize: 22 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-              Search
-            </Typography>
+          {/* — Labeled nav link helper — hidden on mobile since we have BottomNav — */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: { sm: 2, md: 3 } }}>
+            {/* Search */}
+            <Box
+              component={Link}
+              to={ROUTES.SEARCH}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textDecoration: 'none',
+                color: 'text.secondary',
+                px: 1,
+                py: 0.5,
+                borderRadius: 2,
+                transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                '&:hover': {
+                  color: 'primary.main',
+                  bgcolor: 'action.hover',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 22 }} />
+              <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                Search
+              </Typography>
+            </Box>
+
+            {user && (
+              <>
+                {/* Bookings */}
+                <Box
+                  component={Link}
+                  to={ROUTES.CUSTOMER.BOOKINGS}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    color: 'text.secondary',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 2,
+                    transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: 'action.hover',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <CalendarMonthIcon sx={{ fontSize: 22 }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                    Bookings
+                  </Typography>
+                </Box>
+
+                {/* Favorites */}
+                <Box
+                  component={Link}
+                  to={ROUTES.CUSTOMER.FAVORITES}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    color: 'text.secondary',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 2,
+                    transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: 'action.hover',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <FavoriteBorderIcon sx={{ fontSize: 22 }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                    Favorites
+                  </Typography>
+                </Box>
+
+                {/* Notifications */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    color: 'text.secondary',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: 'action.hover',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <NotificationsNoneIcon sx={{ fontSize: 22 }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                    Alerts
+                  </Typography>
+                </Box>
+              </>
+            )}
           </Box>
 
-          {user && (
-            <>
-              {/* Bookings */}
-              <Box
-                component={Link}
-                to={ROUTES.CUSTOMER.BOOKINGS}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textDecoration: 'none',
-                  color: 'text.secondary',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 2,
-                  transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                  '&:hover': {
-                    color: 'primary.main',
-                    bgcolor: 'action.hover',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                <CalendarMonthIcon sx={{ fontSize: 22 }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                  Bookings
-                </Typography>
-              </Box>
-
-              {/* Favorites */}
-              <Box
-                component={Link}
-                to={ROUTES.CUSTOMER.FAVORITES}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textDecoration: 'none',
-                  color: 'text.secondary',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 2,
-                  transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                  '&:hover': {
-                    color: 'primary.main',
-                    bgcolor: 'action.hover',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                <FavoriteBorderIcon sx={{ fontSize: 22 }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                  Favorites
-                </Typography>
-              </Box>
-
-              {/* Notifications */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'text.secondary',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                  '&:hover': {
-                    color: 'primary.main',
-                    bgcolor: 'action.hover',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                <NotificationsNoneIcon sx={{ fontSize: 22 }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                  Alerts
-                </Typography>
-              </Box>
-            </>
-          )}
-
-          {/* Divider between nav items and actions */}
-          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
+          {/* Divider between nav items and actions (hidden on mobile) */}
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' }, mx: 0.5, my: 1 }} />
 
           {/* Theme toggle — icon only, no label needed */}
           <Tooltip title={themeMode === 'dark' ? 'Light Mode' : 'Dark Mode'}>
