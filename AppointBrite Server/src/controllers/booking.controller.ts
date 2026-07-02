@@ -194,3 +194,113 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ success: false, message: 'Server error creating booking' });
   }
 };
+
+export const getUserBookings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const customerId = (req as any).user?.userId;
+    if (!customerId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const bookings = await Booking.find({ customerId })
+      .populate('businessId', 'name location mediaGallery category')
+      .populate('serviceId', 'name durationMinutes price')
+      .sort({ startTime: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error fetching bookings' });
+  }
+};
+
+export const cancelBooking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const customerId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    if (!customerId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const booking = await Booking.findOne({ _id: id, customerId });
+    if (!booking) {
+      res.status(404).json({ success: false, message: 'Booking not found' });
+      return;
+    }
+
+    if (['CANCELED', 'COMPLETED', 'NO_SHOW'].includes(booking.status)) {
+      res.status(400).json({ success: false, message: `Cannot cancel a ${booking.status.toLowerCase()} booking` });
+      return;
+    }
+
+    booking.status = 'CANCELED';
+    await booking.save();
+
+    res.status(200).json({ success: true, data: booking, message: 'Booking canceled successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error canceling booking' });
+  }
+};
+
+export const rescheduleBooking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const customerId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { newStartTime } = req.body;
+
+    if (!customerId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const booking = await Booking.findOne({ _id: id, customerId });
+    if (!booking) {
+      res.status(404).json({ success: false, message: 'Booking not found' });
+      return;
+    }
+
+    if (['CANCELED', 'COMPLETED', 'NO_SHOW'].includes(booking.status)) {
+      res.status(400).json({ success: false, message: `Cannot reschedule a ${booking.status.toLowerCase()} booking` });
+      return;
+    }
+
+    const service = await Service.findById(booking.serviceId).lean();
+    if (!service) {
+      res.status(404).json({ success: false, message: 'Service not found' });
+      return;
+    }
+
+    const totalDuration = service.durationMinutes + service.bufferMinutes;
+    const start = new Date(newStartTime);
+    const end = new Date(start.getTime() + totalDuration * 60 * 1000);
+
+    // Validate availability
+    const overlapping = await Booking.find({
+      businessId: booking.businessId,
+      _id: { $ne: booking._id }, // Ignore current booking
+      status: { $in: ['PENDING', 'CONFIRMED'] },
+      startTime: { $lt: end },
+      endTime: { $gt: start }
+    });
+
+    const currentLoad = overlapping.reduce((sum, b) => sum + (b.partySize || 1), 0);
+    const requestedLoad = booking.partySize || 1;
+
+    if (currentLoad + requestedLoad > (service.capacity || 1)) {
+      res.status(400).json({ success: false, message: 'Selected time slot is not available' });
+      return;
+    }
+
+    booking.startTime = start;
+    booking.endTime = end;
+    // Rescheduling might require re-approval depending on business settings, but for now we keep it CONFIRMED if it was.
+    await booking.save();
+
+    res.status(200).json({ success: true, data: booking, message: 'Booking rescheduled successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error rescheduling booking' });
+  }
+};

@@ -4,8 +4,8 @@ export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED';
 export interface Booking {
   _id: string;
   customerId?: string;
-  businessId: string;
-  serviceId: string;
+  businessId: string | { _id: string, name: string, location: any, mediaGallery: string[], category: string };
+  serviceId: string | { _id: string, name: string, durationMinutes: number, price: number };
   staffId?: string;
   startTime: string;
   endTime: string;

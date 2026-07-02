@@ -5,6 +5,7 @@ import { Router } from 'express';
 import { authRouter } from './auth.routes';
 import { businessRouter } from './business.routes';
 import { bookingRouter } from './booking.routes';
+import { reviewRouter } from './review.routes';
 
 const router = Router();
 
@@ -15,6 +16,6 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRouter);
 router.use('/businesses', businessRouter);
 router.use('/bookings', bookingRouter);
-// TODO: Add booking, user routes
+router.use('/reviews', reviewRouter);
 
 export const apiRouter = router;
