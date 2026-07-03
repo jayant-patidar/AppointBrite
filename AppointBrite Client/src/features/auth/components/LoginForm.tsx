@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/api/auth';
+import { ROUTES } from '@/config/routes';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -45,9 +46,9 @@ export default function LoginForm({ portal = 'CUSTOMER' }: LoginFormProps) {
       dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
       
       if (response.user.role === 'BUSINESS_OWNER' || response.user.role === 'STAFF') {
-        navigate('/dashboard', { replace: true });
+        navigate(ROUTES.DASHBOARD.OVERVIEW, { replace: true });
       } else {
-        navigate('/search', { replace: true });
+        navigate(ROUTES.SEARCH, { replace: true });
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred during login.');

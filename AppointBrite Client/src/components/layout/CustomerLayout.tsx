@@ -15,8 +15,8 @@ export default function CustomerLayout() {
   const { isMobile } = useResponsive();
   const { user } = useAuth();
 
-  // Strict role segregation: Business owners should use the Business Dashboard.
-  if (user?.role === 'BUSINESS_OWNER') {
+  // Strict role segregation: Business owners & staff should use the Business Dashboard.
+  if (user?.role === 'BUSINESS_OWNER' || user?.role === 'STAFF') {
     return <Navigate to={ROUTES.DASHBOARD.OVERVIEW} replace />;
   }
 
