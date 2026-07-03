@@ -157,6 +157,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     const requestedLoad = partySize || 1;
 
     if (currentLoad + requestedLoad > (service.capacity || 1)) {
+      console.error('Validation failed: Time slot is no longer available.', { currentLoad, requestedLoad, capacity: service.capacity });
       res.status(400).json({ success: false, message: 'Time slot is no longer available.' });
       return;
     }
@@ -191,8 +192,12 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       message: status === 'CONFIRMED' ? 'Booking confirmed!' : 'Booking request sent for approval.'
     });
 
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error('Error creating booking:', error);
+    if (error.name === 'ValidationError') {
+      res.status(400).json({ success: false, message: Object.values(error.errors).map((val: any) => val.message).join(', ') });
+      return;
+    }
     res.status(500).json({ success: false, message: 'Server error creating booking' });
   }
 };

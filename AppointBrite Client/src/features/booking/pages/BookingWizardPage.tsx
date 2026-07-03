@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
-  Box, Container, Typography, Stepper, Step, StepLabel, Button, 
-  Paper, CircularProgress, Divider, TextField, Chip, Grid
+  Box, Typography, Button, Container, Grid, 
+  Paper, CircularProgress, Divider, TextField, Chip, IconButton,
+  Stepper, Step, StepLabel
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
@@ -82,7 +85,7 @@ export default function BookingWizardPage() {
   });
 
   const handleNext = () => {
-    if (activeStep === 3) {
+    if (activeStep === 4) {
       // Submit booking
       createBookingMutation.mutate({
         businessId,
@@ -99,7 +102,10 @@ export default function BookingWizardPage() {
     }
   };
 
-  const handleBack = () => setActiveStep((prev) => prev - 1);
+  const handleBack = () => {
+    setActiveStep((prev) => prev - 1);
+    createBookingMutation.reset();
+  };
 
   const business = businessRes?.data;
   const services = servicesRes?.data || [];
@@ -354,21 +360,48 @@ export default function BookingWizardPage() {
                 </>
               )}
 
-              {selectedService?.capacity && selectedService.capacity > 1 && (
                 <Grid size={{ xs: 12 }}>
-                  <TextField 
-                    fullWidth 
-                    type="number" 
-                    label="Party Size" 
-                    value={partySize}
-                    onChange={(e) => {
-                      const num = Number(e.target.value);
-                      setPartySize(num);
-                      setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
-                    }}
-                    slotProps={{ htmlInput: { min: 1, max: selectedService.capacity } }}
-                    sx={{ mb: 2 }}
-                  />
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      Party Size
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <IconButton 
+                        onClick={() => {
+                          const num = Math.max(1, partySize - 1);
+                          setPartySize(num);
+                          setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
+                        }}
+                        disabled={partySize <= 1}
+                        sx={{ bgcolor: 'action.hover' }}
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                      
+                      <Typography variant="h6" sx={{ minWidth: 40, textAlign: 'center', fontWeight: 600 }}>
+                        {partySize}
+                      </Typography>
+                      
+                      <IconButton 
+                        onClick={() => {
+                          const maxCap = selectedService?.capacity || 1;
+                          const num = Math.min(maxCap, partySize + 1);
+                          setPartySize(num);
+                          setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
+                        }}
+                        disabled={partySize >= (selectedService?.capacity || 1)}
+                        sx={{ bgcolor: 'action.hover' }}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                      
+                      {selectedService?.capacity && (
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
+                          Max capacity: {selectedService.capacity}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
                   {partySize > 1 && (
                     <Box sx={{ pl: 2, borderLeft: '2px solid', borderColor: 'primary.main', mb: 2 }}>
                       <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>Party Member Details (Optional)</Typography>
@@ -401,7 +434,6 @@ export default function BookingWizardPage() {
                     </Box>
                   )}
                 </Grid>
-              )}
 
               <Grid size={{ xs: 12 }}>
                 <TextField 
@@ -451,6 +483,16 @@ export default function BookingWizardPage() {
                   <Typography variant="caption" color="text.secondary">Party Size</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>{partySize} people</Typography>
                 </Grid>
+                {partySize > 1 && (
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" color="text.secondary">Party Members</Typography>
+                    {partyMembers.map((member, i) => (
+                      <Typography key={i} variant="body2" sx={{ fontWeight: 500 }}>
+                        {i + 1}. {member.name || 'Unnamed'} {member.phone ? `(${member.phone})` : ''}
+                      </Typography>
+                    ))}
+                  </Grid>
+                )}
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Total Estimated Cost</Typography>
                   <Typography variant="h6" color="primary.main" sx={{ fontWeight: 800 }}>
@@ -463,7 +505,7 @@ export default function BookingWizardPage() {
 
             {createBookingMutation.isError && (
               <Typography color="error" sx={{ mb: 2 }}>
-                Failed to create booking. Please try again.
+                {(createBookingMutation.error as any)?.response?.data?.message || 'Failed to create booking. Please try again.'}
               </Typography>
             )}
           </Box>

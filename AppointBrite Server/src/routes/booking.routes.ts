@@ -14,10 +14,13 @@ const optionalAuth = (req: any, res: any, next: any) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET);
-      req.user = decoded;
+      const decoded = jwt.verify(token, env.JWT_SECRET) as any;
+      req.user = {
+        userId: decoded.id,
+        role: decoded.role,
+      };
     } catch (e) {
-      // ignore
+      // ignore 
     }
   }
   next();
