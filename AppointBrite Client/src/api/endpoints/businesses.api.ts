@@ -49,6 +49,11 @@ export const businessesApi = {
     return data;
   },
 
+  getStaff: async (id: string): Promise<ApiResponse<any[]>> => {
+    const { data } = await axiosInstance.get(`/businesses/${id}/staff`);
+    return data;
+  },
+
   create: async (payload: Partial<Business>): Promise<ApiResponse<Business>> => {
     const { data } = await axiosInstance.post('/businesses', payload);
     return data;

@@ -4,7 +4,7 @@ import {
   Paper, CircularProgress, Divider, TextField, Chip, Grid
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
 import { businessesApi } from '@/api/endpoints/businesses.api';
 import { bookingsApi } from '@/api/endpoints/bookings.api';
@@ -12,7 +12,7 @@ import { ROUTES } from '@/config/routes';
 import { useAuth } from '@/hooks/useAuth';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const steps = ['Select Service', 'Date & Time', 'Your Details', 'Confirm'];
+const steps = ['Select Service', 'Choose Staff', 'Date & Time', 'Your Details', 'Confirm'];
 
 export default function BookingWizardPage() {
   const { businessId } = useParams();
@@ -25,7 +25,9 @@ export default function BookingWizardPage() {
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(''); // ISO string
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(''); // empty means "Any Available"
   const [partySize, setPartySize] = useState<number>(1);
+  const [partyMembers, setPartyMembers] = useState([{ name: '', phone: '' }]);
   const [specialRequests, setSpecialRequests] = useState<string>('');
   const [guestDetails, setGuestDetails] = useState({
     firstName: user?.firstName || '',
@@ -47,6 +49,12 @@ export default function BookingWizardPage() {
     enabled: !!businessId
   });
 
+  const { data: staffRes } = useQuery({
+    queryKey: ['business-staff', businessId],
+    queryFn: () => businessesApi.getStaff(businessId!),
+    enabled: !!businessId
+  });
+
   const { data: availabilityRes, isLoading: availabilityLoading, refetch: fetchSlots } = useQuery({
     queryKey: ['availability', businessId, selectedServiceId, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: () => bookingsApi.checkAvailability(businessId!, { 
@@ -63,9 +71,12 @@ export default function BookingWizardPage() {
     }
   }, [businessId, selectedServiceId, selectedDate, fetchSlots]);
 
+  const queryClient = useQueryClient();
+
   const createBookingMutation = useMutation({
     mutationFn: (payload: any) => bookingsApi.createBooking(payload),
     onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
       navigate(ROUTES.BOOKING_CONFIRMATION.replace(':bookingId', res.data._id));
     }
   });
@@ -76,8 +87,10 @@ export default function BookingWizardPage() {
       createBookingMutation.mutate({
         businessId,
         serviceId: selectedServiceId,
+        staffId: selectedStaffId || undefined,
         startTime: selectedTimeSlot,
         partySize,
+        partyMembers: partySize > 1 ? partyMembers : undefined,
         specialRequests,
         guestDetails: user ? undefined : guestDetails
       });
@@ -90,6 +103,7 @@ export default function BookingWizardPage() {
 
   const business = businessRes?.data;
   const services = servicesRes?.data || [];
+  const staff = staffRes?.data || [];
   const availableSlots = availabilityRes?.data || [];
 
   const selectedService = services.find(s => s._id === selectedServiceId);
@@ -180,8 +194,49 @@ export default function BookingWizardPage() {
           </Box>
         )}
 
-        {/* STEP 1: DATE & TIME */}
+        {/* STEP 1: STAFF */}
         {activeStep === 1 && (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Choose Staff</Typography>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Paper
+                  elevation={0}
+                  onClick={() => setSelectedStaffId('')}
+                  sx={{
+                    p: 3, borderRadius: 3, border: '2px solid',
+                    borderColor: selectedStaffId === '' ? 'primary.main' : 'divider',
+                    cursor: 'pointer', bgcolor: selectedStaffId === '' ? 'primary.50' : 'transparent',
+                    textAlign: 'center'
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Any Available Staff</Typography>
+                </Paper>
+              </Grid>
+              {staff.map((member) => (
+                <Grid size={{ xs: 12, sm: 6 }} key={member._id}>
+                  <Paper
+                    elevation={0}
+                    onClick={() => setSelectedStaffId(member._id)}
+                    sx={{
+                      p: 3, borderRadius: 3, border: '2px solid',
+                      borderColor: selectedStaffId === member._id ? 'primary.main' : 'divider',
+                      cursor: 'pointer', bgcolor: selectedStaffId === member._id ? 'primary.50' : 'transparent',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      {member.userId?.firstName} {member.userId?.lastName}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {/* STEP 2: DATE & TIME */}
+        {activeStep === 2 && (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Choose Date & Time</Typography>
             
@@ -260,8 +315,8 @@ export default function BookingWizardPage() {
           </Box>
         )}
 
-        {/* STEP 2: DETAILS */}
-        {activeStep === 2 && (
+        {/* STEP 3: DETAILS */}
+        {activeStep === 3 && (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Your Details</Typography>
             
@@ -306,9 +361,45 @@ export default function BookingWizardPage() {
                     type="number" 
                     label="Party Size" 
                     value={partySize}
-                    onChange={(e) => setPartySize(Number(e.target.value))}
+                    onChange={(e) => {
+                      const num = Number(e.target.value);
+                      setPartySize(num);
+                      setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
+                    }}
                     slotProps={{ htmlInput: { min: 1, max: selectedService.capacity } }}
+                    sx={{ mb: 2 }}
                   />
+                  {partySize > 1 && (
+                    <Box sx={{ pl: 2, borderLeft: '2px solid', borderColor: 'primary.main', mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>Party Member Details (Optional)</Typography>
+                      {partyMembers.map((member, i) => (
+                        <Grid container spacing={2} sx={{ mb: 2 }} key={i}>
+                          <Grid size={{ xs: 12, sm: 6 }}>
+                            <TextField 
+                              fullWidth size="small" label={`Member ${i + 1} Name`}
+                              value={member.name}
+                              onChange={(e) => {
+                                const newMembers = [...partyMembers];
+                                newMembers[i].name = e.target.value;
+                                setPartyMembers(newMembers);
+                              }}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6 }}>
+                            <TextField 
+                              fullWidth size="small" label={`Member ${i + 1} Phone`}
+                              value={member.phone}
+                              onChange={(e) => {
+                                const newMembers = [...partyMembers];
+                                newMembers[i].phone = e.target.value;
+                                setPartyMembers(newMembers);
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      ))}
+                    </Box>
+                  )}
                 </Grid>
               )}
 
@@ -327,8 +418,8 @@ export default function BookingWizardPage() {
           </Box>
         )}
 
-        {/* STEP 3: CONFIRM */}
-        {activeStep === 3 && (
+        {/* STEP 4: CONFIRM */}
+        {activeStep === 4 && (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Review Booking</Typography>
             
@@ -336,30 +427,30 @@ export default function BookingWizardPage() {
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Business</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{business.name}</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{business?.name}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Service</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>{selectedService?.name}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Date</Typography>
+                  <Typography variant="caption" color="text.secondary">Staff</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    {selectedTimeSlot ? format(new Date(selectedTimeSlot), 'EEEE, MMMM do, yyyy') : ''}
+                    {selectedStaffId 
+                      ? `${staff.find(s => s._id === selectedStaffId)?.userId?.firstName} ${staff.find(s => s._id === selectedStaffId)?.userId?.lastName}`
+                      : 'Any Available'}
                   </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Time</Typography>
+                  <Typography variant="caption" color="text.secondary">Date & Time</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    {selectedTimeSlot ? format(new Date(selectedTimeSlot), 'h:mm a') : ''}
+                    {selectedTimeSlot ? format(new Date(selectedTimeSlot), 'MMM do, yyyy - h:mm a') : ''}
                   </Typography>
                 </Grid>
-                {selectedService?.capacity && selectedService.capacity > 1 && (
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Party Size</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>{partySize} people</Typography>
-                  </Grid>
-                )}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" color="text.secondary">Party Size</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{partySize} people</Typography>
+                </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Total Estimated Cost</Typography>
                   <Typography variant="h6" color="primary.main" sx={{ fontWeight: 800 }}>
@@ -393,14 +484,14 @@ export default function BookingWizardPage() {
           onClick={handleNext}
           disabled={
             (activeStep === 0 && !selectedServiceId) ||
-            (activeStep === 1 && !selectedTimeSlot) ||
-            (activeStep === 2 && !user && (!guestDetails.firstName || !guestDetails.email)) ||
+            (activeStep === 2 && !selectedTimeSlot) ||
+            (activeStep === 3 && !user && (!guestDetails.firstName || !guestDetails.email)) ||
             createBookingMutation.isPending
           }
           sx={{ borderRadius: 9999, px: 4, fontWeight: 700 }}
         >
           {createBookingMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 
-           activeStep === 3 ? 'Confirm Booking' : 'Next'}
+           activeStep === 4 ? 'Confirm Booking' : 'Next'}
         </Button>
       </Box>
     </Container>

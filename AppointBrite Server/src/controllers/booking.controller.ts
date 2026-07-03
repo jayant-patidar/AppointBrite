@@ -124,7 +124,7 @@ export const getAvailability = async (req: Request, res: Response): Promise<void
 export const createBooking = async (req: Request, res: Response): Promise<void> => {
   try {
     const { 
-      businessId, serviceId, startTime, guestDetails, partySize, specialRequests 
+      businessId, serviceId, staffId, startTime, guestDetails, partySize, partyMembers, specialRequests 
     } = req.body;
     
     // Auth user if they exist
@@ -170,6 +170,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       customerId,
       businessId,
       serviceId,
+      staffId,
       startTime: start,
       endTime: end,
       status,
@@ -178,6 +179,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       estimatedCost,
       guestDetails,
       partySize: requestedLoad,
+      partyMembers,
       specialRequests
     });
 

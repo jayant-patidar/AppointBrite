@@ -1,11 +1,41 @@
+import { useEffect } from 'react';
 import { Container, Typography, Box, Button, Paper } from '@mui/material';
 import { useParams, Link } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { ROUTES } from '@/config/routes';
 
 export default function BookingConfirmationPage() {
   const { bookingId } = useParams();
+
+  useEffect(() => {
+    // Fire confetti on load
+    const duration = 3 * 1000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#2563EB', '#60A5FA', '#3B82F6', '#93C5FD', '#FFFFFF']
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#2563EB', '#60A5FA', '#3B82F6', '#93C5FD', '#FFFFFF']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  }, []);
 
   return (
     <Container maxWidth="sm" sx={{ py: 10, textAlign: 'center' }}>

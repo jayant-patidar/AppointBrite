@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Business } from '../models/business.model';
 import { Service } from '../models/service.model';
 import { Review } from '../models/review.model';
+import { Staff } from '../models/staff.model';
 
 /**
  * @route   GET /api/v1/businesses
@@ -86,5 +87,16 @@ export const getBusinessReviews = async (req: Request, res: Response): Promise<v
     res.status(200).json({ success: true, data: reviews });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error fetching reviews' });
+  }
+};
+
+export const getBusinessStaff = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const staff = await Staff.find({ businessId: req.params.id })
+      .populate('userId', 'firstName lastName profileImage')
+      .lean();
+    res.status(200).json({ success: true, data: staff });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error fetching staff' });
   }
 };

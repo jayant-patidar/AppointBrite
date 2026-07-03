@@ -25,6 +25,7 @@ export interface IBooking extends Document {
     phone: string;
   };
   partySize?: number;
+  partyMembers?: { name: string; phone?: string }[];
   specialRequests?: string;
   estimatedCost?: number;
   
@@ -37,7 +38,7 @@ const bookingSchema = new Schema<IBooking>(
     customerId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
     serviceId: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
-    staffId: { type: Schema.Types.ObjectId, ref: 'Staff' },
+    staffId: { type: Schema.Types.ObjectId, ref: 'User' },
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
     status: {
@@ -60,6 +61,12 @@ const bookingSchema = new Schema<IBooking>(
       phone: String,
     },
     partySize: { type: Number, min: 1 },
+    partyMembers: [
+      {
+        name: { type: String },
+        phone: { type: String },
+      }
+    ],
     specialRequests: String,
     estimatedCost: { type: Number, min: 0 },
   },

@@ -90,10 +90,12 @@ function AppRoutes() {
               <Route path={ROUTES.SEARCH} element={<SearchPage />} />
               <Route path={ROUTES.BUSINESS_PROFILE} element={<BusinessProfilePage />} />
 
+              {/* Guest/Customer Accessible Booking Flow */}
+              <Route path={ROUTES.BOOKING_WIZARD} element={<BookingWizardPage />} />
+              <Route path={ROUTES.BOOKING_CONFIRMATION} element={<BookingConfirmationPage />} />
+
               {/* Protected customer routes */}
               <Route element={<ProtectedRoute allowedRoles={['CUSTOMER', 'BUSINESS_OWNER', 'STAFF', 'SUPER_ADMIN']} />}>
-                <Route path={ROUTES.BOOKING_WIZARD} element={<BookingWizardPage />} />
-                <Route path={ROUTES.BOOKING_CONFIRMATION} element={<BookingConfirmationPage />} />
                 <Route path={ROUTES.CUSTOMER.DASHBOARD} element={<CustomerDashboardPage />} />
                 <Route path={ROUTES.CUSTOMER.BOOKINGS} element={<MyBookingsPage />} />
                 <Route path={ROUTES.CUSTOMER.FAVORITES} element={<FavoritesPage />} />

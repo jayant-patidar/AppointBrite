@@ -6,6 +6,7 @@ import { authRouter } from './auth.routes';
 import { businessRouter } from './business.routes';
 import { bookingRouter } from './booking.routes';
 import { reviewRouter } from './review.routes';
+import { userRouter } from './user.routes';
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use('/auth', authRouter);
 router.use('/businesses', businessRouter);
 router.use('/bookings', bookingRouter);
 router.use('/reviews', reviewRouter);
+router.use('/users', userRouter);
 
 export const apiRouter = router;

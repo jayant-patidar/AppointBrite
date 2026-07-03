@@ -3,7 +3,7 @@ import {
   Container, Typography, Box, Tabs, Tab, CircularProgress, 
   Paper, Button, Chip, Dialog, DialogTitle, DialogContent, 
   DialogActions, DialogContentText, TextField, Rating, Snackbar, Alert, Grid,
-  Menu, MenuItem
+  Menu, MenuItem, Skeleton
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -212,8 +212,27 @@ export default function MyBookingsPage() {
 
   if (isLoading) {
     return (
-      <Container sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>My Bookings</Typography>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Skeleton variant="rectangular" height={48} width="100%" />
+        </Box>
+        {Array.from(new Array(3)).map((_, i) => (
+          <Paper key={i} sx={{ p: 2, mb: 2, borderRadius: 3, display: 'flex', flexDirection: 'column', gap: 2 }} elevation={2}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+              <Skeleton variant="rectangular" sx={{ width: { xs: 80, sm: 100 }, height: { xs: 80, sm: 100 }, borderRadius: 2 }} />
+              <Box sx={{ flex: 1 }}>
+                <Skeleton variant="text" height={32} width="60%" />
+                <Skeleton variant="text" height={24} width="40%" />
+                <Skeleton variant="text" height={24} width="50%" sx={{ mt: 1 }} />
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Skeleton variant="rectangular" height={24} width={80} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={30} width={120} sx={{ borderRadius: 1 }} />
+            </Box>
+          </Paper>
+        ))}
       </Container>
     );
   }

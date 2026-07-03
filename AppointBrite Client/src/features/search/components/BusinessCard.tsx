@@ -1,7 +1,10 @@
-import { Card, CardMedia, CardContent, Typography, Box, Rating, Chip, alpha, useTheme } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Box, Rating, Chip, alpha, useTheme, IconButton } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from 'react-router-dom';
 import type { Business } from '@/types/business.types';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface BusinessCardProps {
   business: Business;
@@ -10,6 +13,8 @@ interface BusinessCardProps {
 export default function BusinessCard({ business }: BusinessCardProps) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { favoriteIds, toggleFavorite } = useFavorites();
+  const isFavorite = favoriteIds.has(business._id);
   // Use a nice unsplash fallback if media gallery is empty
   const defaultImage = 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&w=600&q=80';
   const imageUrl = business.mediaGallery && business.mediaGallery.length > 0 
@@ -57,6 +62,29 @@ export default function BusinessCard({ business }: BusinessCardProps) {
             transition: 'opacity 0.3s ease'
           }}
         />
+        
+        {/* Favorite Button */}
+        <IconButton
+          onClick={(e) => toggleFavorite(business._id, e)}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            backgroundColor: alpha(theme.palette.background.paper, 0.85),
+            backdropFilter: 'blur(8px)',
+            color: isFavorite ? '#FF6B6B' : theme.palette.text.secondary,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            '&:hover': {
+              backgroundColor: theme.palette.background.paper,
+              transform: 'scale(1.1)',
+            },
+            transition: 'all 0.2s',
+          }}
+          size="small"
+        >
+          {isFavorite ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+        </IconButton>
+
         {/* Category Chip Floating on Image */}
         <Chip 
           label={business.category.replace('_', ' ')} 

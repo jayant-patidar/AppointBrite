@@ -1,6 +1,9 @@
-import { Box, Typography, Avatar, Rating, Chip, Skeleton, useTheme } from '@mui/material';
+import { Box, Typography, Avatar, Rating, Chip, Skeleton, useTheme, IconButton } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import type { Business } from '@/types/business.types';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface BusinessHeaderProps {
   business?: Business;
@@ -9,6 +12,9 @@ interface BusinessHeaderProps {
 
 export default function BusinessHeader({ business, isLoading }: BusinessHeaderProps) {
   const theme = useTheme();
+  const { favoriteIds, toggleFavorite } = useFavorites();
+  const isFavorite = business ? favoriteIds.has(business._id) : false;
+  
   const coverImage = business?.mediaGallery?.[0] || 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=80';
   const logoImage = business?.mediaGallery?.[1] || '';
 
@@ -103,6 +109,20 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
               color="primary" 
               sx={{ fontWeight: 700, borderRadius: 2 }} 
             />
+            {business._id && (
+              <IconButton 
+                onClick={(e) => toggleFavorite(business._id, e)}
+                sx={{
+                  color: isFavorite ? '#FF6B6B' : 'text.secondary',
+                  bgcolor: 'background.paper',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  '&:hover': { transform: 'scale(1.1)', bgcolor: 'background.paper' },
+                  transition: 'all 0.2s'
+                }}
+              >
+                {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+              </IconButton>
+            )}
           </Box>
           
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 2, flexWrap: 'wrap' }}>

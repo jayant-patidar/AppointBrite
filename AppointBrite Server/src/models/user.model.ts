@@ -1,7 +1,7 @@
 /**
  * User model (per Doc 04 — users collection).
  */
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { Schema, type Document, type Types } from 'mongoose';
 
 export type UserRole = 'CUSTOMER' | 'BUSINESS_OWNER' | 'STAFF' | 'SUPER_ADMIN';
 
@@ -27,6 +27,7 @@ export interface IUser extends Document {
     preferredCommunication: 'EMAIL' | 'SMS' | 'BOTH';
   };
   timezone?: string;
+  favorites: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +66,7 @@ const userSchema = new Schema<IUser>(
       },
     },
     timezone: { type: String },
+    favorites: [{ type: Schema.Types.ObjectId, ref: 'Business' }],
   },
   { timestamps: true },
 );
