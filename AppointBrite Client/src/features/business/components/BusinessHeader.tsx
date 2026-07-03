@@ -103,12 +103,14 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
             <Typography variant="h3" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
               {business.name}
             </Typography>
-            <Chip 
-              label={business.category.replace('_', ' ')} 
-              size="small" 
-              color="primary" 
-              sx={{ fontWeight: 700, borderRadius: 2 }} 
-            />
+            {business.category && (
+              <Chip 
+                label={business.category.replace('_', ' ')} 
+                size="small" 
+                color="primary" 
+                sx={{ fontWeight: 700, borderRadius: 2 }} 
+              />
+            )}
             {business._id && (
               <IconButton 
                 onClick={(e) => toggleFavorite(business._id, e)}
@@ -134,12 +136,14 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
                 </Typography>
               </Box>
             )}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-              <LocationOnIcon fontSize="small" />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {business.location.address}, {business.location.city}
-              </Typography>
-            </Box>
+            {business.location && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                <LocationOnIcon fontSize="small" />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {business.location.address}, {business.location.city}
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           {/* Description */}

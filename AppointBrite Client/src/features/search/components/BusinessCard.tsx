@@ -86,26 +86,28 @@ export default function BusinessCard({ business }: BusinessCardProps) {
         </IconButton>
 
         {/* Category Chip Floating on Image */}
-        <Chip 
-          label={business.category.replace('_', ' ')} 
-          size="small" 
-          sx={{ 
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            fontWeight: 700, 
-            fontSize: '0.7rem',
-            backdropFilter: 'blur(8px)',
-            backgroundColor: alpha(theme.palette.background.paper, 0.85),
-            color: theme.palette.text.primary,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-            '&:hover': {
-              backgroundColor: theme.palette.primary.main,
-              color: '#fff',
-            }
-          }} 
-        />
+        {business.category && (
+          <Chip 
+            label={business.category.replace('_', ' ')} 
+            size="small" 
+            sx={{ 
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              fontWeight: 700, 
+              fontSize: '0.7rem',
+              backdropFilter: 'blur(8px)',
+              backgroundColor: alpha(theme.palette.background.paper, 0.85),
+              color: theme.palette.text.primary,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.main,
+                color: '#fff',
+              }
+            }} 
+          />
+        )}
       </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 3, pt: 2, position: 'relative' }}>

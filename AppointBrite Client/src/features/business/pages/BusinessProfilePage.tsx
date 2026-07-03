@@ -2,7 +2,7 @@
  * BusinessProfilePage — public business profile with services, reviews, and booking/reservation entry.
  */
 import { useParams } from 'react-router-dom';
-import { Container, Grid, Box, CircularProgress, Typography, Skeleton } from '@mui/material';
+import { Container, Grid, Box, Typography, Skeleton } from '@mui/material';
 import BusinessHeader from '../components/BusinessHeader';
 import ServiceMenu from '../components/ServiceMenu';
 import OperatingHoursDisplay from '../components/OperatingHoursDisplay';

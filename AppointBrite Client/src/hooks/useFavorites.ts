@@ -7,7 +7,7 @@ export function useFavorites() {
   const queryClient = useQueryClient();
 
   const { data: favoritesRes, isLoading } = useQuery({
-    queryKey: ['favorites', user?.id],
+    queryKey: ['favorites', user?._id],
     queryFn: usersApi.getFavorites,
     enabled: !!user,
   });
@@ -18,14 +18,14 @@ export function useFavorites() {
   const addFavoriteMutation = useMutation({
     mutationFn: (businessId: string) => usersApi.addFavorite(businessId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['favorites', user?._id] });
     },
   });
 
   const removeFavoriteMutation = useMutation({
     mutationFn: (businessId: string) => usersApi.removeFavorite(businessId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['favorites', user?._id] });
     },
   });
 
