@@ -4,7 +4,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import type { Business } from '@/types/business.types';
 import { useFavorites } from '@/hooks/useFavorites';
-
+import { getDefaultImageForCategory } from '@/utils/categoryImages';
 interface BusinessHeaderProps {
   business?: Business;
   isLoading: boolean;
@@ -14,8 +14,10 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
   const theme = useTheme();
   const { favoriteIds, toggleFavorite } = useFavorites();
   const isFavorite = business ? favoriteIds.has(business._id) : false;
-  
-  const coverImage = business?.mediaGallery?.[0] || 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=80';
+  const defaultImage = getDefaultImageForCategory(business?.category);
+  const coverImage = business?.mediaGallery && business.mediaGallery.length > 0 && business.mediaGallery[0] !== ''
+    ? business.mediaGallery[0]
+    : defaultImage;
   const logoImage = business?.mediaGallery?.[1] || '';
 
   if (isLoading) {

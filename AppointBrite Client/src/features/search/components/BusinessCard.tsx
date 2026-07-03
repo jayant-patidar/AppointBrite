@@ -5,6 +5,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from 'react-router-dom';
 import type { Business } from '@/types/business.types';
 import { useFavorites } from '@/hooks/useFavorites';
+import { getDefaultImageForCategory } from '@/utils/categoryImages';
 
 interface BusinessCardProps {
   business: Business;
@@ -15,9 +16,8 @@ export default function BusinessCard({ business }: BusinessCardProps) {
   const navigate = useNavigate();
   const { favoriteIds, toggleFavorite } = useFavorites();
   const isFavorite = favoriteIds.has(business._id);
-  // Use a nice unsplash fallback if media gallery is empty
-  const defaultImage = 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&w=600&q=80';
-  const imageUrl = business.mediaGallery && business.mediaGallery.length > 0 
+  const defaultImage = getDefaultImageForCategory(business.category);
+  const imageUrl = business.mediaGallery && business.mediaGallery.length > 0 && business.mediaGallery[0] !== ''
     ? business.mediaGallery[0] 
     : defaultImage;
 

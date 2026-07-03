@@ -15,6 +15,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi } from '@/api/endpoints/bookings.api';
 import { reviewsApi } from '@/api/endpoints/reviews.api';
 import type { Booking } from '@/types/booking.types';
+import { getDefaultImageForCategory } from '@/utils/categoryImages';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -181,7 +182,9 @@ export default function MyBookingsPage() {
   const renderBookingCard = (booking: Booking) => {
     const business = booking.businessId as any;
     const service = booking.serviceId as any;
-    const businessImage = business?.mediaGallery?.[0] || 'https://via.placeholder.com/150';
+    const businessImage = business?.mediaGallery && business.mediaGallery.length > 0 && business.mediaGallery[0] !== ''
+      ? business.mediaGallery[0]
+      : getDefaultImageForCategory(business?.category);
 
     return (
       <Paper key={booking._id} sx={{ p: 2, mb: 2, borderRadius: 3, display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }} elevation={2}>
