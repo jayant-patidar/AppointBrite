@@ -2,14 +2,12 @@
  * Sidebar — collapsible left navigation for dashboard/admin (per Doc 06).
  */
 import {
-  Drawer,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Box,
-  Typography,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -44,39 +42,21 @@ export default function Sidebar({ width, open }: SidebarProps) {
   const location = useLocation();
 
   return (
-    <Drawer
-      variant="permanent"
+    <Box
+      component="aside"
       sx={{
         width,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width,
-          boxSizing: 'border-box',
-          borderRight: 1,
-          borderColor: 'divider',
-          transition: 'width 200ms ease-in-out',
-          overflowX: 'hidden',
-        },
+        borderRight: 1,
+        borderColor: 'divider',
+        transition: 'width 200ms ease-in-out',
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        bgcolor: 'background.paper',
+        display: { xs: 'none', md: 'block' },
       }}
     >
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            fontFamily: '"Outfit", sans-serif',
-            background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {open ? 'AppointBrite' : 'AB'}
-        </Typography>
-      </Box>
-
-      <List sx={{ px: 1 }}>
+      <List sx={{ px: 1, mt: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
@@ -98,6 +78,6 @@ export default function Sidebar({ width, open }: SidebarProps) {
           </ListItem>
         ))}
       </List>
-    </Drawer>
+    </Box>
   );
 }

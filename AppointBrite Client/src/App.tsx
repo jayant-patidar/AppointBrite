@@ -40,6 +40,7 @@ const CustomerCRMPage = lazy(() => import('@/features/dashboard/pages/CustomerCR
 const AnalyticsPage = lazy(() => import('@/features/dashboard/pages/AnalyticsPage'));
 const BusinessProfileEditPage = lazy(() => import('@/features/dashboard/pages/BusinessProfileEditPage'));
 const PromotionsPage = lazy(() => import('@/features/dashboard/pages/PromotionsPage'));
+const OnboardingWizardPage = lazy(() => import('@/features/dashboard/pages/OnboardingWizardPage'));
 const AdminDashboardPage = lazy(() => import('@/features/admin/pages/AdminDashboardPage'));
 const UserManagementPage = lazy(() => import('@/features/admin/pages/UserManagementPage'));
 const BusinessVerificationPage = lazy(() => import('@/features/admin/pages/BusinessVerificationPage'));
@@ -105,6 +106,7 @@ function AppRoutes() {
 
             {/* ── Business Dashboard ── */}
             <Route element={<ProtectedRoute allowedRoles={['BUSINESS_OWNER', 'STAFF']} />}>
+              <Route path={ROUTES.DASHBOARD.ONBOARDING} element={<OnboardingWizardPage />} />
               <Route element={<DashboardLayout />}>
                 <Route path={ROUTES.DASHBOARD.ROOT} element={<Navigate to={ROUTES.DASHBOARD.OVERVIEW} replace />} />
                 <Route path={ROUTES.DASHBOARD.OVERVIEW} element={<DashboardOverviewPage />} />

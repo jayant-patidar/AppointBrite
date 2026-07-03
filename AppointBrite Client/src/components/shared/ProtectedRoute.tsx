@@ -28,5 +28,13 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 
+  // Intercept BUSINESS_OWNER who hasn't completed onboarding
+  if (user?.role === 'BUSINESS_OWNER') {
+    const step = user.businessProfile?.onboardingStep || 1;
+    if (step < 4 && location.pathname !== ROUTES.DASHBOARD.ONBOARDING) {
+      return <Navigate to={ROUTES.DASHBOARD.ONBOARDING} replace />;
+    }
+  }
+
   return <Outlet />;
 }

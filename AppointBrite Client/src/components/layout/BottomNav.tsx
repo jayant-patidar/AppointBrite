@@ -8,19 +8,34 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
-
-const navItems = [
-  { label: 'Search', icon: <SearchIcon />, path: ROUTES.SEARCH },
-  { label: 'Bookings', icon: <CalendarTodayIcon />, path: ROUTES.CUSTOMER.BOOKINGS },
-  { label: 'Favorites', icon: <FavoriteIcon />, path: ROUTES.CUSTOMER.FAVORITES },
-  { label: 'Profile', icon: <PersonIcon />, path: ROUTES.CUSTOMER.PROFILE },
-];
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
-  const currentIndex = navItems.findIndex((item) => location.pathname.startsWith(item.path));
+  const getNavItems = () => {
+    const base = [{ label: 'Search', icon: <SearchIcon />, path: ROUTES.SEARCH }];
+    
+    if (user?.role === 'BUSINESS_OWNER') {
+      return [
+        { label: 'My Business', icon: <StorefrontIcon />, path: ROUTES.DASHBOARD.OVERVIEW },
+        { label: 'Profile', icon: <PersonIcon />, path: ROUTES.CUSTOMER.PROFILE },
+      ];
+    }
+    
+    return [
+      ...base,
+      { label: 'Bookings', icon: <CalendarTodayIcon />, path: ROUTES.CUSTOMER.BOOKINGS },
+      { label: 'Favorites', icon: <FavoriteIcon />, path: ROUTES.CUSTOMER.FAVORITES },
+      { label: 'Profile', icon: <PersonIcon />, path: ROUTES.CUSTOMER.PROFILE },
+    ];
+  };
+
+  const currentNavItems = getNavItems();
+  const currentIndex = currentNavItems.findIndex((item) => location.pathname.startsWith(item.path));
 
   return (
     <Paper
@@ -37,10 +52,10 @@ export default function BottomNav() {
     >
       <BottomNavigation
         value={currentIndex === -1 ? 0 : currentIndex}
-        onChange={(_event, newValue) => navigate(navItems[newValue].path)}
+        onChange={(_event, newValue) => navigate(currentNavItems[newValue].path)}
         showLabels
       >
-        {navItems.map((item) => (
+        {currentNavItems.map((item) => (
           <BottomNavigationAction
             key={item.path}
             label={item.label}

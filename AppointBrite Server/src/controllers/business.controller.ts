@@ -100,3 +100,70 @@ export const getBusinessStaff = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ success: false, message: 'Server Error fetching staff' });
   }
 };
+
+/**
+ * @route   GET /api/v1/businesses/my-business
+ * @desc    Get logged in user's business profile
+ * @access  Private (Business Owner)
+ */
+export const getMyBusiness = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Not authenticated' });
+      return;
+    }
+    const business = await Business.findOne({ ownerId: req.user.userId }).lean();
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: business });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || 'Server Error getting business profile' });
+  }
+};
+
+/**
+ * @route   PATCH /api/v1/businesses/my-business
+ * @desc    Update business onboarding step or settings
+ * @access  Private
+ */
+export const updateMyBusiness = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Not authenticated' });
+      return;
+    }
+    if (req.user.role !== 'BUSINESS_OWNER') {
+      res.status(403).json({ success: false, message: 'Only business owners can update business details' });
+      return;
+    }
+
+    const business = await Business.findOne({ ownerId: req.user.userId });
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found' });
+      return;
+    }
+
+    const updates = req.body;
+    
+    if (updates.onboardingStep === 4) {
+      business.isActive = true;
+    }
+
+    if (updates.location) {
+      updates.location.type = 'Point';
+      if (!updates.location.coordinates || updates.location.coordinates.length === 0) {
+        // Fallback coordinates since 2dsphere requires them
+        updates.location.coordinates = [0, 0];
+      }
+    }
+
+    Object.assign(business, updates);
+    await business.save();
+
+    res.status(200).json({ success: true, data: business });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || 'Server Error updating business profile' });
+  }
+};

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, Stepper, Step, StepLabel, Button, Typography, 
   TextField, FormControlLabel, 
@@ -18,6 +18,7 @@ const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string(),
+  businessName: z.string().optional(),
   phoneNumber: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY', '']).optional(),
@@ -33,19 +34,36 @@ const registerSchema = z.object({
     preferredCommunication: z.enum(['EMAIL', 'SMS', 'BOTH']).default('EMAIL'),
   }).optional(),
   timezone: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+}).superRefine((data, ctx) => {
+  if (data.password !== data.confirmPassword) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    });
+  }
+  if (data.role === 'BUSINESS_OWNER' && (!data.businessName || data.businessName.trim() === '')) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Business name is required",
+      path: ["businessName"],
+    });
+  }
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const steps = ['Basic Details', 'Personal Info', 'Preferences'];
-
-const Step2 = () => {
+const Step2 = ({ isBusiness }: { isBusiness: boolean }) => {
   const { control, formState: { errors } } = useFormContext<RegisterFormValues>();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
+      {isBusiness && (
+        <Controller
+          name="businessName"
+          control={control}
+          render={({ field }) => <TextField {...field} label="Business Name" fullWidth error={!!errors.businessName} helperText={errors.businessName?.message} />}
+        />
+      )}
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Controller
           name="firstName"
@@ -168,6 +186,9 @@ interface RegisterStepperProps {
 }
 
 export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepperProps) {
+  const isBusiness = portal === 'BUSINESS';
+  const steps = isBusiness ? ['Basic Details'] : ['Basic Details', 'Personal Info', 'Preferences'];
+
   const [activeStep, setActiveStep] = useState(0);
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -176,7 +197,7 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
   const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema as any),
     defaultValues: {
-      role: portal === 'BUSINESS' ? 'BUSINESS_OWNER' : 'CUSTOMER',
+      role: isBusiness ? 'BUSINESS_OWNER' : 'CUSTOMER',
       firstName: '',
       lastName: '',
       email: '',
@@ -192,12 +213,19 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
     mode: 'onTouched'
   });
 
-  const { trigger, handleSubmit } = methods;
+  const { trigger, handleSubmit, setValue } = methods;
+
+  // Ensure role updates when the portal tab changes
+  useEffect(() => {
+    setValue('role', isBusiness ? 'BUSINESS_OWNER' : 'CUSTOMER');
+    // We should also clear errors when switching tabs
+    methods.clearErrors();
+  }, [isBusiness, setValue, methods]);
 
   const handleNext = async () => {
     let fieldsToValidate: (keyof RegisterFormValues)[] = [];
-    if (activeStep === 0) fieldsToValidate = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
-    if (activeStep === 1) fieldsToValidate = ['phoneNumber', 'dateOfBirth', 'gender'];
+    if (activeStep === 0) fieldsToValidate = isBusiness ? ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'businessName'] : ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
+    if (activeStep === 1 && !isBusiness) fieldsToValidate = ['phoneNumber', 'dateOfBirth', 'gender'];
 
     const isValid = await trigger(fieldsToValidate);
     if (isValid) {
@@ -242,7 +270,7 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4, display: isBusiness ? 'none' : 'flex' }}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -258,9 +286,9 @@ export default function RegisterStepper({ portal = 'CUSTOMER' }: RegisterStepper
 
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          {activeStep === 0 && <Step2 />}
-          {activeStep === 1 && <Step3 />}
-          {activeStep === 2 && <Step4 />}
+          {activeStep === 0 && <Step2 isBusiness={isBusiness} />}
+          {activeStep === 1 && !isBusiness && <Step3 />}
+          {activeStep === 2 && !isBusiness && <Step4 />}
 
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 4 }}>
             <Button

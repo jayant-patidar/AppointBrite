@@ -3,6 +3,7 @@
  */
 import jwt from 'jsonwebtoken';
 import { User, type IUser } from '../models/user.model';
+import { Business } from '../models/business.model';
 import { env } from '../config/env';
 import { hashPassword, comparePassword } from '../utils/hashPassword';
 import { UnauthorizedError } from '../errors/UnauthorizedError';
@@ -18,7 +19,20 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async register(data: Partial<IUser>) {
+  private async attachBusinessProfile(userResponse: any) {
+    if (userResponse.role === 'BUSINESS_OWNER' || userResponse.role === 'STAFF') {
+      const business = await Business.findOne({ ownerId: userResponse._id }).select('_id onboardingStep');
+      if (business) {
+        userResponse.businessProfile = {
+          _id: business._id.toString(),
+          onboardingStep: business.onboardingStep,
+        };
+      }
+    }
+    return userResponse;
+  }
+
+  async register(data: Partial<IUser> & { businessName?: string }) {
     const existingUser = await User.findOne({ email: data.email });
     if (existingUser) {
       throw new ConflictError('Email already in use');
@@ -31,11 +45,21 @@ export class AuthService {
       passwordHash: hashedPassword,
     });
 
+    if (data.role === 'BUSINESS_OWNER' && data.businessName) {
+      await Business.create({
+        ownerId: user._id,
+        name: data.businessName,
+        onboardingStep: 1,
+      });
+    }
+
     const tokens = this.generateTokens(user);
 
     // Don't send password hash back
-    const userResponse = user.toObject();
+    let userResponse = user.toObject();
     delete (userResponse as any).passwordHash;
+    
+    userResponse = await this.attachBusinessProfile(userResponse);
 
     return { user: userResponse, ...tokens };
   }
@@ -57,8 +81,10 @@ export class AuthService {
 
     const tokens = this.generateTokens(user);
 
-    const userResponse = user.toObject();
+    let userResponse = user.toObject();
     delete (userResponse as any).passwordHash;
+    
+    userResponse = await this.attachBusinessProfile(userResponse);
 
     return { user: userResponse, ...tokens };
   }
@@ -70,8 +96,10 @@ export class AuthService {
       if (!user) throw new UnauthorizedError('User no longer exists');
 
       const tokens = this.generateTokens(user);
-      const userResponse = user.toObject();
+      let userResponse = user.toObject();
       delete (userResponse as any).passwordHash;
+      
+      userResponse = await this.attachBusinessProfile(userResponse);
 
       return { user: userResponse, ...tokens };
     } catch (error) {
@@ -83,8 +111,10 @@ export class AuthService {
     const user = await User.findById(userId);
     if (!user) throw new UnauthorizedError('User not found');
     
-    const userResponse = user.toObject();
+    let userResponse = user.toObject();
     delete (userResponse as any).passwordHash;
+    
+    userResponse = await this.attachBusinessProfile(userResponse);
     return userResponse;
   }
 }

@@ -28,16 +28,17 @@ export const ROUTES = {
 
   // Business Dashboard
   DASHBOARD: {
-    ROOT: '/dashboard',
-    OVERVIEW: '/dashboard/overview',
-    CALENDAR: '/dashboard/calendar',
-    BOOKINGS: '/dashboard/bookings',
-    SERVICES: '/dashboard/services',
-    STAFF: '/dashboard/staff',
-    CUSTOMERS: '/dashboard/customers',
-    ANALYTICS: '/dashboard/analytics',
-    PROFILE: '/dashboard/profile',
-    PROMOTIONS: '/dashboard/promotions',
+    ROOT: '/business',
+    ONBOARDING: '/business/onboarding',
+    OVERVIEW: '/business/dashboard',
+    CALENDAR: '/business/calendar',
+    BOOKINGS: '/business/bookings',
+    SERVICES: '/business/services',
+    STAFF: '/business/staff',
+    CUSTOMERS: '/business/customers',
+    ANALYTICS: '/business/analytics',
+    PROFILE: '/business/profile',
+    PROMOTIONS: '/business/promotions',
   },
 
   // Super Admin

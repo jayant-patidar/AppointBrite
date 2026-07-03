@@ -16,20 +16,21 @@ export default function DashboardLayout() {
   const currentWidth = sidebarOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH;
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar width={currentWidth} open={sidebarOpen} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <Header />
+      
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar width={currentWidth} open={sidebarOpen} />
 
-      <Box
-        sx={{
-          flex: 1,
-          ml: `${currentWidth}px`,
-          transition: 'margin-left 200ms ease-in-out',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <Header />
-        <Box component="main" sx={{ flex: 1, p: 3 }}>
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            p: 3,
+            bgcolor: 'background.default'
+          }}
+        >
           <Outlet />
         </Box>
       </Box>

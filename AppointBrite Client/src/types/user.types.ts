@@ -12,6 +12,10 @@ export interface User {
   phoneNumber?: string;
   role: UserRole;
   profileImage?: string;
+  businessProfile?: {
+    _id: string;
+    onboardingStep: number;
+  };
   createdAt: string;
   updatedAt: string;
 }

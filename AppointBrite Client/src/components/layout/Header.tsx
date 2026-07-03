@@ -15,6 +15,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
 import { toggleTheme } from '@/store/slices/uiSlice';
@@ -112,88 +113,120 @@ export default function Header() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2, md: 3 } }}>
           {/* — Labeled nav link helper — hidden on mobile since we have BottomNav — */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: { sm: 2, md: 3 } }}>
-            {/* Search */}
-            <Box
-              component={Link}
-              to={ROUTES.SEARCH}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: 'text.secondary',
-                px: 1,
-                py: 0.5,
-                borderRadius: 2,
-                transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                '&:hover': {
-                  color: 'primary.main',
-                  bgcolor: 'action.hover',
-                  transform: 'translateY(-2px)',
-                },
-              }}
-            >
-              <SearchIcon sx={{ fontSize: 22 }} />
-              <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                Search
-              </Typography>
-            </Box>
+            {/* Search (Hidden for Business Owners) */}
+            {user?.role !== 'BUSINESS_OWNER' && (
+              <Box
+                component={Link}
+                to={ROUTES.SEARCH}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  color: 'text.secondary',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 2,
+                  transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                  '&:hover': {
+                    color: 'primary.main',
+                    bgcolor: 'action.hover',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <SearchIcon sx={{ fontSize: 22 }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                  Search
+                </Typography>
+              </Box>
+            )}
 
             {user && (
               <>
-                {/* Bookings */}
-                <Box
-                  component={Link}
-                  to={ROUTES.CUSTOMER.BOOKINGS}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: 'text.secondary',
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 2,
-                    transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                    '&:hover': {
-                      color: 'primary.main',
-                      bgcolor: 'action.hover',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <CalendarMonthIcon sx={{ fontSize: 22 }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                    Bookings
-                  </Typography>
-                </Box>
+                {user.role === 'BUSINESS_OWNER' ? (
+                  <Box
+                    component={Link}
+                    to={ROUTES.DASHBOARD.OVERVIEW}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textDecoration: 'none',
+                      color: 'text.secondary',
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 2,
+                      transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                      '&:hover': {
+                        color: 'primary.main',
+                        bgcolor: 'action.hover',
+                        transform: 'translateY(-2px)',
+                      },
+                    }}
+                  >
+                    <StorefrontIcon sx={{ fontSize: 22 }} />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                      My Business
+                    </Typography>
+                  </Box>
+                ) : (
+                  <>
+                    {/* Bookings */}
+                    <Box
+                      component={Link}
+                      to={ROUTES.CUSTOMER.BOOKINGS}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        color: 'text.secondary',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 2,
+                        transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                        '&:hover': {
+                          color: 'primary.main',
+                          bgcolor: 'action.hover',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
+                    >
+                      <CalendarMonthIcon sx={{ fontSize: 22 }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                        Bookings
+                      </Typography>
+                    </Box>
 
-                {/* Favorites */}
-                <Box
-                  component={Link}
-                  to={ROUTES.CUSTOMER.FAVORITES}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: 'text.secondary',
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 2,
-                    transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
-                    '&:hover': {
-                      color: 'primary.main',
-                      bgcolor: 'action.hover',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <FavoriteBorderIcon sx={{ fontSize: 22 }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
-                    Favorites
-                  </Typography>
-                </Box>
+                    {/* Favorites */}
+                    <Box
+                      component={Link}
+                      to={ROUTES.CUSTOMER.FAVORITES}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        color: 'text.secondary',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 2,
+                        transition: 'color 0.2s, background-color 0.2s, transform 0.2s',
+                        '&:hover': {
+                          color: 'primary.main',
+                          bgcolor: 'action.hover',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
+                    >
+                      <FavoriteBorderIcon sx={{ fontSize: 22 }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, mt: 0.25, lineHeight: 1 }}>
+                        Favorites
+                      </Typography>
+                    </Box>
+                  </>
+                )}
 
                 {/* Notifications */}
                 <Box

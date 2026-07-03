@@ -18,17 +18,20 @@ export type BusinessCategory =
 export type SubscriptionTier = 'FREE' | 'PRO' | 'ENTERPRISE';
 
 export interface OperatingHours {
-  dayOfWeek: number; // 0 = Sunday, 6 = Saturday
-  openTime: string; // "09:00"
-  closeTime: string; // "17:00"
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
   isClosed: boolean;
+  splitShifts?: { openTime: string; closeTime: string }[];
 }
 
 export interface GeoLocation {
   type: 'Point';
-  coordinates: [number, number]; // [longitude, latitude]
+  coordinates: [number, number];
   address: string;
   city: string;
+  state?: string;
+  country?: string;
   zipCode: string;
 }
 
@@ -41,15 +44,73 @@ export interface Business {
   _id: string;
   ownerId: string;
   name: string;
-  description: string;
-  category: BusinessCategory;
-  location: GeoLocation;
+  legalName?: string;
+  description?: string;
+  shortDescription?: string;
+  category?: BusinessCategory;
+  subCategories?: string[];
+  establishedYear?: number;
+  contact?: {
+    businessPhone?: string;
+    businessEmail?: string;
+    website?: string;
+  };
+  location?: GeoLocation;
+  serviceArea?: {
+    maxRadiusMiles?: number;
+    coveredZipCodes?: string[];
+  };
+  licenses?: {
+    licenseType: string;
+    licenseNumber: string;
+    expirationDate: string;
+    verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  }[];
+  insuranceInfo?: {
+    providerName: string;
+    policyNumber: string;
+    coverageAmount: string;
+  };
   operatingHours: OperatingHours[];
+  specialHours?: {
+    date: string;
+    openTime: string;
+    closeTime: string;
+    isClosed: boolean;
+  }[];
+  timezone?: string;
   mediaGallery: string[];
+  logoUrl?: string;
+  coverPhotoUrl?: string;
+  brandColors?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
   rating: BusinessRating;
   subscriptionTier: SubscriptionTier;
   stripeAccountId?: string;
+  cancellationPolicy?: {
+    type: 'FLEXIBLE' | 'MODERATE' | 'STRICT';
+    feePercentage?: number;
+    cutoffHours?: number;
+  };
+  depositRequired?: boolean;
+  depositPercentage?: number;
   maxAdvanceBookingDays: number;
+  bookingSettings?: {
+    minAdvanceBookingHours?: number;
+    slotDurationInterval?: number;
+    autoApproveBookings?: boolean;
+  };
+  socialLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    yelp?: string;
+    googleMyBusiness?: string;
+  };
+  amenities?: string[];
   isActive: boolean;
+  onboardingStep: number;
   createdAt: string;
 }

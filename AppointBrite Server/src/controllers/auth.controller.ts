@@ -18,7 +18,7 @@ const setAuthCookies = (res: Response, refreshToken: string) => {
 export class AuthController {
   async register(req: Request, res: Response) {
     const { 
-      firstName, lastName, email, password, role, 
+      firstName, lastName, email, password, role, businessName,
       phoneNumber, dateOfBirth, gender, address, preferences, timezone 
     } = req.body as any;
 
@@ -28,6 +28,7 @@ export class AuthController {
       email,
       passwordHash: password, // mapped to plain text here, hashed in service
       role,
+      businessName,
       phoneNumber,
       dateOfBirth,
       gender,
