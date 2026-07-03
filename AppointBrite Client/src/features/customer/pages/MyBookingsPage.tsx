@@ -5,6 +5,7 @@ import {
   DialogActions, DialogContentText, TextField, Rating, Snackbar, Alert, Grid,
   Menu, MenuItem, Skeleton
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -40,12 +41,14 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 export default function MyBookingsPage() {
+  const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const queryClient = useQueryClient();
 
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState<number | null>(5);
@@ -111,6 +114,16 @@ export default function MyBookingsPage() {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => bookingsApi.deleteBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+      setDeleteModalOpen(false);
+      setSnackbarMsg('Booking deleted successfully.');
+      setSnackbarOpen(true);
+    }
+  });
+
   const bookings = bookingsRes?.data || [];
   
   const upcomingBookings = bookings.filter(b => ['PENDING', 'CONFIRMED'].includes(b.status));
@@ -124,6 +137,11 @@ export default function MyBookingsPage() {
   const handleCancelClick = (booking: Booking) => {
     setSelectedBooking(booking);
     setCancelModalOpen(true);
+  };
+
+  const handleDeleteClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setDeleteModalOpen(true);
   };
 
   const handleRescheduleClick = (booking: Booking) => {
@@ -143,6 +161,15 @@ export default function MyBookingsPage() {
   const handleSupportClick = (event: React.MouseEvent<HTMLElement>, booking: Booking) => {
     setSupportAnchorEl(event.currentTarget);
     setSupportBooking(booking);
+  };
+
+  const handleRebookClick = (booking: Booking) => {
+    navigate(`/book/${(booking.businessId as any)?._id}`, {
+      state: { 
+        prefillServiceId: (booking.serviceId as any)?._id,
+        prefillStaffId: booking.staffId || ''
+      }
+    });
   };
 
   const handleSupportClose = () => {
@@ -202,7 +229,13 @@ export default function MyBookingsPage() {
               </>
             ) : null}
             {booking.status === 'COMPLETED' ? (
-              <Button size="small" variant="contained" onClick={() => handleReviewClick(booking)}>Leave Feedback</Button>
+              <>
+                <Button size="small" variant="contained" onClick={() => handleReviewClick(booking)}>Leave Feedback</Button>
+                <Button size="small" variant="outlined" onClick={() => handleRebookClick(booking)}>Re-book</Button>
+              </>
+            ) : null}
+            {['CANCELED', 'NO_SHOW'].includes(booking.status) ? (
+              <Button size="small" variant="outlined" color="error" onClick={() => handleDeleteClick(booking)}>Delete</Button>
             ) : null}
           </Box>
         </Box>
@@ -291,6 +324,22 @@ export default function MyBookingsPage() {
           <Button onClick={() => setCancelModalOpen(false)} color="inherit">Keep Booking</Button>
           <Button onClick={() => selectedBooking && cancelMutation.mutate(selectedBooking._id)} color="error" variant="contained" disabled={cancelMutation.isPending}>
             {cancelMutation.isPending ? 'Canceling...' : 'Yes, Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+        <DialogTitle>Delete Booking</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to permanently delete this canceled booking from your history?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteModalOpen(false)} color="inherit">Cancel</Button>
+          <Button onClick={() => selectedBooking && deleteMutation.mutate(selectedBooking._id)} color="error" variant="contained" disabled={deleteMutation.isPending}>
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

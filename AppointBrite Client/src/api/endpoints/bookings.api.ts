@@ -30,4 +30,9 @@ export const bookingsApi = {
     const { data } = await axiosInstance.patch(`/bookings/${bookingId}/reschedule`, { newStartTime });
     return data;
   },
+  
+  deleteBooking: async (id: string): Promise<ApiResponse<any>> => {
+    const { data } = await axiosInstance.delete(`/bookings/${id}`);
+    return data;
+  },
 };

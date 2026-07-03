@@ -83,6 +83,27 @@ const baseTheme: ThemeOptions = {
         }
       }
     },
+    MuiAlert: {
+      defaultProps: {
+        variant: 'filled',
+        elevation: 6,
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          fontWeight: 500,
+        },
+      },
+      variants: [
+        {
+          props: { variant: 'filled', severity: 'success' },
+          style: {
+            backgroundColor: '#10B981', // ensure it pops
+            color: '#ffffff',
+          },
+        },
+      ],
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {

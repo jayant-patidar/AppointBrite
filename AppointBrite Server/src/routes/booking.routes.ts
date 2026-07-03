@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAvailability, createBooking, getUserBookings, cancelBooking, rescheduleBooking } from '../controllers/booking.controller';
+import { getAvailability, createBooking, getUserBookings, cancelBooking, rescheduleBooking, deleteBooking } from '../controllers/booking.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
@@ -33,5 +33,6 @@ router.use(authenticate);
 router.get('/', getUserBookings);
 router.patch('/:id/cancel', cancelBooking);
 router.patch('/:id/reschedule', rescheduleBooking);
+router.delete('/:id', deleteBooking);
 
 export const bookingRouter = router;

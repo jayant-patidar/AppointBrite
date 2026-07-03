@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
 import { businessesApi } from '@/api/endpoints/businesses.api';
@@ -20,15 +20,19 @@ const steps = ['Select Service', 'Choose Staff', 'Date & Time', 'Your Details', 
 export default function BookingWizardPage() {
   const { businessId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   
-  const [activeStep, setActiveStep] = useState(0);
+  const prefillServiceId = location.state?.prefillServiceId;
+  const prefillStaffId = location.state?.prefillStaffId;
+
+  const [activeStep, setActiveStep] = useState(prefillServiceId ? 2 : 0);
   
   // Form State
-  const [selectedServiceId, setSelectedServiceId] = useState<string>('');
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(prefillServiceId || '');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(''); // ISO string
-  const [selectedStaffId, setSelectedStaffId] = useState<string>(''); // empty means "Any Available"
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(prefillStaffId || ''); // empty means "Any Available"
   const [partySize, setPartySize] = useState<number>(1);
   const [partyMembers, setPartyMembers] = useState([{ name: '', phone: '' }]);
   const [specialRequests, setSpecialRequests] = useState<string>('');

@@ -308,6 +308,38 @@ export const rescheduleBooking = async (req: Request, res: Response): Promise<vo
 
     res.status(200).json({ success: true, data: booking, message: 'Booking rescheduled successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: 'Server error rescheduling booking' });
+  }
+};
+
+export const deleteBooking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user?.userId;
+
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      res.status(404).json({ success: false, message: 'Booking not found' });
+      return;
+    }
+
+    if (booking.customerId?.toString() !== userId) {
+      res.status(403).json({ success: false, message: 'Not authorized to delete this booking' });
+      return;
+    }
+
+    if (!['CANCELED', 'NO_SHOW'].includes(booking.status)) {
+      res.status(400).json({ success: false, message: 'Only canceled or no-show bookings can be deleted' });
+      return;
+    }
+
+    await Booking.findByIdAndDelete(id);
+
+    res.status(200).json({ success: true, message: 'Booking deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error deleting booking' });
   }
 };
