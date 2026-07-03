@@ -16,9 +16,10 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
-import { toggleTheme } from '@/store/slices/uiSlice';
+import { toggleTheme, toggleSidebar } from '@/store/slices/uiSlice';
 import { logout } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
@@ -64,17 +65,26 @@ export default function Header() {
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Box 
-          component={Link} 
-          to="/" 
-          sx={{ 
-            textDecoration: 'none', 
-            display: 'flex', 
-            alignItems: 'center',
-            transition: 'transform 0.2s',
-            '&:hover': { transform: 'scale(1.02)' }
-          }}
-        >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {(user?.role === 'BUSINESS_OWNER' || user?.role === 'STAFF') && (
+            <IconButton
+              onClick={() => dispatch(toggleSidebar())}
+              sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+          <Box 
+            component={Link} 
+            to="/" 
+            sx={{ 
+              textDecoration: 'none', 
+              display: 'flex', 
+              alignItems: 'center',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'scale(1.02)' }
+            }}
+          >
           <Box
             component="img"
             src={themeMode === 'dark' ? '/dark them logo.png' : '/light theme logo.png'}
@@ -108,6 +118,7 @@ export default function Header() {
               Brite
             </Box>
           </Typography>
+          </Box>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2, md: 3 } }}>

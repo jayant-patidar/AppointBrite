@@ -7,7 +7,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
+  Drawer,
+  Toolbar,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -23,6 +24,8 @@ import { ROUTES } from '@/config/routes';
 interface SidebarProps {
   width: number;
   open: boolean;
+  variant?: 'permanent' | 'temporary';
+  onClose?: () => void;
 }
 
 const menuItems = [
@@ -37,31 +40,50 @@ const menuItems = [
   { label: 'Promotions', icon: <LocalOfferIcon />, path: ROUTES.DASHBOARD.PROMOTIONS },
 ];
 
-export default function Sidebar({ width, open }: SidebarProps) {
+export default function Sidebar({ width, open, variant = 'permanent', onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (variant === 'temporary' && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Box
-      component="aside"
+    <Drawer
+      variant={variant}
+      open={open}
+      onClose={onClose}
       sx={{
         width,
         flexShrink: 0,
-        borderRight: 1,
-        borderColor: 'divider',
-        transition: 'width 200ms ease-in-out',
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        bgcolor: 'background.paper',
-        display: { xs: 'none', md: 'block' },
+        '& .MuiDrawer-paper': {
+          width,
+          boxSizing: 'border-box',
+          borderRight: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          transition: 'width 200ms ease-in-out',
+          overflowX: 'hidden',
+          ...(variant === 'permanent' && {
+            position: 'static', // override fixed position for permanent drawer
+          }),
+        },
+        ...(variant === 'permanent' && {
+          display: { xs: 'none', md: 'block' },
+        }),
       }}
     >
+      {/* Spacer to push content down below the Header */}
+      <Toolbar />
       <List sx={{ px: 1, mt: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               sx={{
                 borderRadius: 2,
                 '&.Mui-selected': {
@@ -78,6 +100,6 @@ export default function Sidebar({ width, open }: SidebarProps) {
           </ListItem>
         ))}
       </List>
-    </Box>
+    </Drawer>
   );
 }

@@ -77,7 +77,15 @@ export default function BusinessProfileEditPage() {
           businessEmail: business.contact?.businessEmail || '',
           website: business.contact?.website || ''
         },
-        operatingHours: business.operatingHours || [],
+        operatingHours: Array.from({ length: 7 }, (_, i) => {
+          const existing = business.operatingHours?.find((h: any) => h.dayOfWeek === i);
+          return existing || {
+            dayOfWeek: i,
+            openTime: '09:00',
+            closeTime: '17:00',
+            isClosed: true,
+          };
+        }),
         socialLinks: {
           instagram: business.socialLinks?.instagram || '',
           facebook: business.socialLinks?.facebook || '',
@@ -335,42 +343,44 @@ export default function BusinessProfileEditPage() {
                         <Controller
                           name={`operatingHours.${index}.isClosed`}
                           control={control}
-                          render={({ field: { onChange, value } }) => (
-                            <FormControlLabel
-                              control={<Switch checked={value} onChange={e => onChange(e.target.checked)} />}
-                              label="Closed"
-                              sx={{ width: 100 }}
-                            />
-                          )}
-                        />
-
-                        <Controller
-                          name={`operatingHours.${index}.openTime`}
-                          control={control}
-                          render={({ field: { onChange, value } }) => (
-                            <TextField
-                              type="time"
-                              label="Open"
-                              value={value}
-                              onChange={onChange}
-                              size="small"
-                              slotProps={{ inputLabel: { shrink: true } }}
-                            />
-                          )}
-                        />
-
-                        <Controller
-                          name={`operatingHours.${index}.closeTime`}
-                          control={control}
-                          render={({ field: { onChange, value } }) => (
-                            <TextField
-                              type="time"
-                              label="Close"
-                              value={value}
-                              onChange={onChange}
-                              size="small"
-                              slotProps={{ inputLabel: { shrink: true } }}
-                            />
+                          render={({ field: { onChange, value: isClosed } }) => (
+                            <>
+                              <FormControlLabel
+                                control={<Switch checked={isClosed} onChange={e => onChange(e.target.checked)} />}
+                                label="Closed"
+                                sx={{ width: 100 }}
+                              />
+                              <Controller
+                                name={`operatingHours.${index}.openTime`}
+                                control={control}
+                                render={({ field: { onChange: onTimeChange, value: timeValue } }) => (
+                                  <TextField
+                                    type="time"
+                                    label="Open"
+                                    value={timeValue}
+                                    onChange={onTimeChange}
+                                    size="small"
+                                    disabled={isClosed}
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                  />
+                                )}
+                              />
+                              <Controller
+                                name={`operatingHours.${index}.closeTime`}
+                                control={control}
+                                render={({ field: { onChange: onTimeChange, value: timeValue } }) => (
+                                  <TextField
+                                    type="time"
+                                    label="Close"
+                                    value={timeValue}
+                                    onChange={onTimeChange}
+                                    size="small"
+                                    disabled={isClosed}
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                  />
+                                )}
+                              />
+                            </>
                           )}
                         />
                       </Box>
