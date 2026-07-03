@@ -9,6 +9,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { businessesApi } from '@/api/endpoints/businesses.api';
 import { bookingsApi } from '@/api/endpoints/bookings.api';
 import { ROUTES } from '@/config/routes';
@@ -312,7 +313,7 @@ export default function BookingWizardPage() {
                   return (
                     <Chip
                       key={slot}
-                      label={format(new Date(slot), 'h:mm a')}
+                      label={formatInTimeZone(new Date(slot), 'America/New_York', 'h:mm a')}
                       onClick={() => setSelectedTimeSlot(slot)}
                       color={isSelected ? 'primary' : 'default'}
                       variant={isSelected ? 'filled' : 'outlined'}
@@ -480,7 +481,7 @@ export default function BookingWizardPage() {
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Date & Time</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    {selectedTimeSlot ? format(new Date(selectedTimeSlot), 'MMM do, yyyy - h:mm a') : ''}
+                    {selectedTimeSlot ? formatInTimeZone(new Date(selectedTimeSlot), 'America/New_York', 'MMM do, yyyy - h:mm a') : ''}
                   </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>

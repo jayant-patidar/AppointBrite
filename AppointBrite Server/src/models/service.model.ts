@@ -6,6 +6,7 @@ import mongoose, { Schema, type Document, type Types } from 'mongoose';
 export interface IService extends Document {
   businessId: Types.ObjectId;
   name: string;
+  category?: string;
   description: string;
   price: number;
   durationMinutes: number;
@@ -19,6 +20,7 @@ const serviceSchema = new Schema<IService>(
   {
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
     name: { type: String, required: true, trim: true },
+    category: { type: String, trim: true },
     description: { type: String, default: '' },
     price: { type: Number, required: true, min: 0 },
     durationMinutes: { type: Number, required: true, min: 1 },

@@ -10,6 +10,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ChatIcon from '@mui/icons-material/Chat';
 import { format, addDays, isSameDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi } from '@/api/endpoints/bookings.api';
 import { reviewsApi } from '@/api/endpoints/reviews.api';
@@ -200,7 +201,7 @@ export default function MyBookingsPage() {
               {business?.name} - {business?.location?.address}
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>Date:</strong> {format(new Date(booking.startTime), 'MMM do, yyyy - h:mm a')}
+              <strong>Date:</strong> {formatInTimeZone(new Date(booking.startTime), 'America/New_York', 'MMM do, yyyy - h:mm a')}
             </Typography>
             <Typography variant="body2">
               <strong>Party Size:</strong> {booking.partySize || 1}
@@ -392,7 +393,7 @@ export default function MyBookingsPage() {
                 return (
                   <Grid size={{ xs: 4, sm: 3 }} key={slot}>
                     <Chip
-                      label={format(new Date(slot), 'h:mm a')}
+                      label={formatInTimeZone(new Date(slot), 'America/New_York', 'h:mm a')}
                       clickable
                       onClick={() => setRescheduleSlot(slot)}
                       color={selected ? 'primary' : 'default'}

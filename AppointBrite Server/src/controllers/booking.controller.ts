@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { fromZonedTime } from 'date-fns-tz';
 import { Booking } from '../models/booking.model';
 import { Business } from '../models/business.model';
 import { Service } from '../models/service.model';
@@ -6,24 +7,25 @@ import { Service } from '../models/service.model';
 /**
  * Helper function to generate time slots based on operating hours and duration.
  */
-function generateTimeSlots(openTime: string, closeTime: string, durationMinutes: number): Date[] {
+function generateTimeSlots(targetDateStr: string, openTime: string, closeTime: string, durationMinutes: number): Date[] {
   const slots: Date[] = [];
   
-  // Parse times (e.g. "09:00", "17:00")
   const [openHour, openMin] = openTime.split(':').map(Number);
   const [closeHour, closeMin] = closeTime.split(':').map(Number);
   
-  // Convert to total minutes from midnight for easy math
   let currentMin = openHour * 60 + openMin;
   const endMin = closeHour * 60 + closeMin;
-
-  // We generate slots every 30 minutes, or based on the service duration if we want strict blocking.
-  // Standard approach: 30-min intervals.
   const interval = 30;
 
   while (currentMin + durationMinutes <= endMin) {
-    const slotTime = new Date();
-    slotTime.setUTCHours(Math.floor(currentMin / 60), currentMin % 60, 0, 0);
+    const h = Math.floor(currentMin / 60);
+    const m = currentMin % 60;
+    
+    // Construct local date-time string: 'YYYY-MM-DDTHH:mm:00'
+    const dateTimeStr = `${targetDateStr}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+    
+    // Convert this local New York time to a proper UTC Date
+    const slotTime = fromZonedTime(dateTimeStr, 'America/New_York');
     slots.push(slotTime);
     currentMin += interval;
   }
@@ -64,23 +66,14 @@ export const getAvailability = async (req: Request, res: Response): Promise<void
     // 3. Total duration needed
     const totalDuration = service.durationMinutes + service.bufferMinutes;
 
-    // 4. Generate all possible slots for the day
-    const allSlots = generateTimeSlots(operatingHours.openTime, operatingHours.closeTime, totalDuration);
-
-    // Set the dates of the slots to the targetDate
-    allSlots.forEach(slot => {
-      slot.setUTCFullYear(targetDate.getUTCFullYear());
-      slot.setUTCMonth(targetDate.getUTCMonth());
-      slot.setUTCDate(targetDate.getUTCDate());
-    });
+    // 4. Generate all possible slots for the day in EST
+    const allSlots = generateTimeSlots(date as string, operatingHours.openTime, operatingHours.closeTime, totalDuration);
 
     // 5. Fetch existing bookings for this business on this date
-    // Start of day
-    const startOfDay = new Date(targetDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-    // End of day
-    const endOfDay = new Date(targetDate);
-    endOfDay.setUTCHours(23, 59, 59, 999);
+    // Start of day in EST
+    const startOfDay = fromZonedTime(`${date}T00:00:00`, 'America/New_York');
+    // End of day in EST
+    const endOfDay = fromZonedTime(`${date}T23:59:59`, 'America/New_York');
 
     const existingBookings = await Booking.find({
       businessId,
