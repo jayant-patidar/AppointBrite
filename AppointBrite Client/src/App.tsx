@@ -11,7 +11,7 @@ import { queryClient } from '@/api/queryClient';
 import { lightTheme, darkTheme } from '@/styles/theme';
 import { ROUTES } from '@/config/routes';
 import { authApi } from '@/api/auth';
-import { setUser } from '@/store/slices/authSlice';
+import { setUser, setLoading } from '@/store/slices/authSlice';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
@@ -58,8 +58,20 @@ function AppRoutes() {
   useEffect(() => {
     authApi.me()
       .then((user) => dispatch(setUser(user)))
-      .catch(() => { /* silent fail, user is not logged in */ });
+      .catch(() => { /* silent fail, user is not logged in */ })
+      .finally(() => dispatch(setLoading(false)));
   }, [dispatch]);
+
+  useEffect(() => {
+    document.title = 'AppointBrite - Book Appointments & Reservations';
+    let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = themeMode === 'dark' ? '/dark them logo.png' : '/light theme logo.png';
+  }, [themeMode]);
 
   return (
     <ThemeProvider theme={theme}>

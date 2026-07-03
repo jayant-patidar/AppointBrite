@@ -56,6 +56,7 @@ export default function SearchPage() {
             variant="h2" 
             sx={{ 
               fontWeight: 800, 
+              fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' },
               mb: 3,
               lineHeight: 1.1,
               letterSpacing: '-0.03em',

@@ -156,23 +156,33 @@ export default function MyBookingsPage() {
     const businessImage = business?.mediaGallery?.[0] || 'https://via.placeholder.com/150';
 
     return (
-      <Paper key={booking._id} sx={{ p: 2, mb: 2, borderRadius: 3, display: 'flex', gap: 2, alignItems: 'center' }} elevation={2}>
-        <Box 
-          component="img"
-          src={businessImage}
-          sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
-        />
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{service?.name}</Typography>
-          <Typography variant="body2" color="text.secondary">{business?.name} - {business?.location?.address}</Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            <strong>Date:</strong> {format(new Date(booking.startTime), 'MMM do, yyyy - h:mm a')}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Party Size:</strong> {booking.partySize || 1}
-          </Typography>
+      <Paper key={booking._id} sx={{ p: 2, mb: 2, borderRadius: 3, display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }} elevation={2}>
+        
+        {/* Top Half: Image & Details */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+          <Box 
+            component="img"
+            src={businessImage}
+            sx={{ width: { xs: 80, sm: 100 }, height: { xs: 80, sm: 100 }, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
+          />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1rem', sm: '1.25rem' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {service?.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {business?.name} - {business?.location?.address}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>Date:</strong> {format(new Date(booking.startTime), 'MMM do, yyyy - h:mm a')}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Party Size:</strong> {booking.partySize || 1}
+            </Typography>
+          </Box>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+
+        {/* Bottom Half: Status & Actions */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
           <Chip 
             label={booking.status} 
             color={
@@ -183,18 +193,18 @@ export default function MyBookingsPage() {
             size="small"
             sx={{ fontWeight: 'bold' }}
           />
-          {booking.status === 'CONFIRMED' || booking.status === 'PENDING' ? (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" onClick={() => handleRescheduleClick(booking)}>Reschedule</Button>
-              <Button size="small" variant="outlined" color="error" onClick={() => handleCancelClick(booking)}>Cancel</Button>
-            </Box>
-          ) : null}
-          {booking.status === 'CONFIRMED' || booking.status === 'PENDING' ? (
-            <Button size="small" variant="text" onClick={(e) => handleSupportClick(e, booking)}>Get Help</Button>
-          ) : null}
-          {booking.status === 'COMPLETED' ? (
-            <Button size="small" variant="contained" onClick={() => handleReviewClick(booking)}>Leave Feedback</Button>
-          ) : null}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {booking.status === 'CONFIRMED' || booking.status === 'PENDING' ? (
+              <>
+                <Button size="small" variant="outlined" onClick={() => handleRescheduleClick(booking)}>Reschedule</Button>
+                <Button size="small" variant="outlined" color="error" onClick={() => handleCancelClick(booking)}>Cancel</Button>
+                <Button size="small" variant="text" onClick={(e) => handleSupportClick(e, booking)}>Get Help</Button>
+              </>
+            ) : null}
+            {booking.status === 'COMPLETED' ? (
+              <Button size="small" variant="contained" onClick={() => handleReviewClick(booking)}>Leave Feedback</Button>
+            ) : null}
+          </Box>
         </Box>
       </Paper>
     );
@@ -213,7 +223,14 @@ export default function MyBookingsPage() {
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>My Bookings</Typography>
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabIndex} onChange={handleTabChange} aria-label="booking tabs">
+        <Tabs 
+          value={tabIndex} 
+          onChange={handleTabChange} 
+          aria-label="booking tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           <Tab label={`Upcoming (${upcomingBookings.length})`} />
           <Tab label={`Past (${pastBookings.length})`} />
           <Tab label={`Canceled (${canceledBookings.length})`} />

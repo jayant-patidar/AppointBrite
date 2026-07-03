@@ -76,10 +76,37 @@ export default function Header() {
         >
           <Box
             component="img"
-            src="/headerlogo.png"
-            alt="AppointBrite"
-            sx={{ height: 40, width: 'auto' }}
+            src={themeMode === 'dark' ? '/dark them logo.png' : '/light theme logo.png'}
+            alt="Logo"
+            sx={{ height: 36, width: 'auto', mr: 1.5 }}
           />
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              letterSpacing: '-0.02em',
+              display: 'flex',
+              alignItems: 'center',
+              userSelect: 'none'
+            }}
+          >
+            <Box component="span" sx={{ color: 'text.primary' }}>
+              Appoint
+            </Box>
+            <Box
+              component="span"
+              sx={{
+                background: themeMode === 'dark'
+                  ? 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)'
+                  : 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Brite
+            </Box>
+          </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2, md: 3 } }}>
