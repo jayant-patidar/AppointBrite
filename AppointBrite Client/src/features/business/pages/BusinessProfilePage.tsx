@@ -1,19 +1,22 @@
 /**
  * BusinessProfilePage — public business profile with services, reviews, and booking/reservation entry.
  */
-import { useParams } from 'react-router-dom';
-import { Container, Grid, Box, Typography, Skeleton } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Grid, Box, Typography, Skeleton, Button } from '@mui/material';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import BusinessHeader from '../components/BusinessHeader';
 import ServiceMenu from '../components/ServiceMenu';
 import OperatingHoursDisplay from '../components/OperatingHoursDisplay';
 import MediaGallery from '../components/MediaGallery';
 import ReviewList from '../components/ReviewList';
 import StickyBookingWidget from '../components/StickyBookingWidget';
+import BusinessDetails from '../components/BusinessDetails';
 import { useBusiness, useBusinessServices, useBusinessReviews } from '../hooks/useBusiness';
 
 
 export default function BusinessProfilePage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: business, isLoading: isBusinessLoading, isError: isBusinessError } = useBusiness(id);
   const { data: services, isLoading: isServicesLoading } = useBusinessServices(id);
   const { data: reviews, isLoading: isReviewsLoading } = useBusinessReviews(id);
@@ -62,12 +65,40 @@ export default function BusinessProfilePage() {
             <ServiceMenu services={services || []} />
             <MediaGallery images={business.mediaGallery?.length ? business.mediaGallery : []} />
             <ReviewList reviews={reviews || []} />
+            <Box sx={{ mt: 2 }}>
+              <BusinessDetails business={business} />
+            </Box>
           </Grid>
           
           {/* Sidebar (Right column on Desktop) */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ position: 'sticky', top: 100 }}>
-              <Box sx={{ mb: 4 }}>
+              <Box sx={{ mb: 4, mt: { md: -14 }, position: 'relative', zIndex: 10 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  size="large"
+                  startIcon={<EventAvailableIcon />}
+                  onClick={() => navigate(`/book/${id}`)}
+                  sx={{
+                    mb: 3,
+                    py: 1.5,
+                    borderRadius: 9999,
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    textTransform: 'none',
+                    boxShadow: '0 8px 20px rgba(37, 99, 235, 0.3)',
+                    '&:hover': {
+                      boxShadow: '0 12px 28px rgba(37, 99, 235, 0.4)',
+                      transform: 'translateY(-2px)'
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                    display: { xs: 'none', md: 'flex' }
+                  }}
+                >
+                  Book Appointment or Reservation
+                </Button>
                 <OperatingHoursDisplay hours={business.operatingHours} />
               </Box>
               {/* Sticky Booking Widget handles its own sticky positioning on mobile/desktop */}

@@ -1,7 +1,8 @@
-import { Box, Typography, Avatar, Rating, Chip, Skeleton, useTheme, IconButton } from '@mui/material';
+import { Box, Typography, Avatar, Rating, Chip, Skeleton, useTheme, IconButton, alpha } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { Business } from '@/types/business.types';
 import { useFavorites } from '@/hooks/useFavorites';
 import { getDefaultImageForCategory } from '@/utils/categoryImages';
@@ -99,53 +100,56 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
         >
           {business.name.charAt(0)}
         </Avatar>
-        
         <Box sx={{ flex: 1, pb: 1, textAlign: { xs: 'center', sm: 'left' } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 1.5, mb: 1 }}>
-            <Typography variant="h3" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-              {business.name}
-            </Typography>
-            {business.category && (
-              <Chip 
-                label={business.category.replace('_', ' ')} 
-                size="small" 
-                color="primary" 
-                sx={{ fontWeight: 700, borderRadius: 2 }} 
-              />
-            )}
-            {business._id && (
-              <IconButton 
-                onClick={(e) => toggleFavorite(business._id, e)}
-                sx={{
-                  color: isFavorite ? '#FF6B6B' : 'text.secondary',
-                  bgcolor: 'background.paper',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                  '&:hover': { transform: 'scale(1.1)', bgcolor: 'background.paper' },
-                  transition: 'all 0.2s'
-                }}
-              >
-                {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-              </IconButton>
-            )}
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 2, flexWrap: 'wrap' }}>
-            {business.rating && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Rating value={business.rating.average} precision={0.5} size="small" readOnly />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {business.rating.average} ({business.rating.count} reviews)
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'center', sm: 'flex-start' }, gap: 2 }}>
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 1.5, mb: 1 }}>
+                <Typography variant="h3" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+                  {business.name}
                 </Typography>
+                {business.category && (
+                  <Chip 
+                    label={business.category.replace('_', ' ')} 
+                    size="small" 
+                    color="primary" 
+                    sx={{ fontWeight: 700, borderRadius: 2 }} 
+                  />
+                )}
+                {business._id && (
+                  <IconButton 
+                    onClick={(e) => toggleFavorite(business._id, e)}
+                    sx={{
+                      color: isFavorite ? '#FF6B6B' : 'text.secondary',
+                      bgcolor: 'background.paper',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      '&:hover': { transform: 'scale(1.1)', bgcolor: 'background.paper' },
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                  </IconButton>
+                )}
               </Box>
-            )}
-            {business.location && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-                <LocationOnIcon fontSize="small" />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {business.location.address}, {business.location.city}
-                </Typography>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, gap: 2, flexWrap: 'wrap' }}>
+                {business.rating && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Rating value={business.rating.average} precision={0.5} size="small" readOnly />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {business.rating.average} ({business.rating.count} reviews)
+                    </Typography>
+                  </Box>
+                )}
+                {business.location && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                    <LocationOnIcon fontSize="small" />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {business.location.address}, {business.location.city}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
-            )}
+            </Box>
           </Box>
 
           {/* Description */}
@@ -153,6 +157,54 @@ export default function BusinessHeader({ business, isLoading }: BusinessHeaderPr
             <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, maxWidth: 800, mx: { xs: 'auto', sm: 0 } }}>
               {business.description}
             </Typography>
+          </Box>
+
+          {/* Sub-categories & Amenities */}
+          <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+            {business.subCategories?.map((sub, i) => (
+              <Chip 
+                key={`sub-${i}`} 
+                label={sub} 
+                size="small" 
+                sx={{ 
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  borderRadius: '12px',
+                  border: '1px solid',
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.2),
+                  px: 1,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.2),
+                    transform: 'translateY(-1px)',
+                  }
+                }} 
+              />
+            ))}
+            {business.amenities?.map((amenity, i) => (
+              <Chip 
+                key={`am-${i}`} 
+                icon={<CheckCircleIcon sx={{ fontSize: '14px !important', color: 'text.secondary' }} />}
+                label={amenity} 
+                size="small" 
+                sx={{ 
+                  bgcolor: 'background.paper', 
+                  color: 'text.secondary', 
+                  fontWeight: 600, 
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  px: 1,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.08)',
+                    transform: 'translateY(-1px)',
+                  }
+                }} 
+              />
+            ))}
           </Box>
         </Box>
       </Box>
