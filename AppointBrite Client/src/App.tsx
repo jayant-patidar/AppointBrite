@@ -15,6 +15,7 @@ import { setUser, setLoading } from '@/store/slices/authSlice';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
+import ScrollToTop from '@/components/shared/ScrollToTop';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -78,6 +79,7 @@ function AppRoutes() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             {/* ── Public Routes ── */}

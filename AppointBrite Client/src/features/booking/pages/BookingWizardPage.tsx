@@ -114,7 +114,15 @@ export default function BookingWizardPage() {
 
   const business = businessRes?.data;
   const services = servicesRes?.data || [];
-  const staff = staffRes?.data || [];
+  const allStaff = staffRes?.data || [];
+  
+  const staff = allStaff.filter((member: any) => {
+    if (!selectedServiceId) return true;
+    if (!member.providedServices || member.providedServices.length === 0) return false; 
+    return member.providedServices.some((s: any) => 
+      typeof s === 'string' ? s === selectedServiceId : s._id === selectedServiceId
+    );
+  });
   const availableSlots = availabilityRes?.data || [];
 
   const selectedService = services.find(s => s._id === selectedServiceId);
@@ -228,11 +236,11 @@ export default function BookingWizardPage() {
                 <Grid size={{ xs: 12, sm: 6 }} key={member._id}>
                   <Paper
                     elevation={0}
-                    onClick={() => setSelectedStaffId(member._id)}
+                    onClick={() => setSelectedStaffId(member.userId?._id)}
                     sx={{
                       p: 3, borderRadius: 3, border: '2px solid',
-                      borderColor: selectedStaffId === member._id ? 'primary.main' : 'divider',
-                      cursor: 'pointer', bgcolor: selectedStaffId === member._id ? 'primary.50' : 'transparent',
+                      borderColor: selectedStaffId === member.userId?._id ? 'primary.main' : 'divider',
+                      cursor: 'pointer', bgcolor: selectedStaffId === member.userId?._id ? 'primary.50' : 'transparent',
                       textAlign: 'center'
                     }}
                   >

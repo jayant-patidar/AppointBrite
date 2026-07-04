@@ -182,6 +182,7 @@ export default function MyBookingsPage() {
   const renderBookingCard = (booking: Booking) => {
     const business = booking.businessId as any;
     const service = booking.serviceId as any;
+    const staff = booking.staffId as any;
     const businessImage = business?.mediaGallery && business.mediaGallery.length > 0 && business.mediaGallery[0] !== ''
       ? business.mediaGallery[0]
       : getDefaultImageForCategory(business?.category);
@@ -206,6 +207,11 @@ export default function MyBookingsPage() {
             <Typography variant="body2" sx={{ mt: 1 }}>
               <strong>Date:</strong> {formatInTimeZone(new Date(booking.startTime), 'America/New_York', 'MMM do, yyyy - h:mm a')}
             </Typography>
+            {staff && (
+              <Typography variant="body2">
+                <strong>Staff:</strong> {staff.firstName} {staff.lastName}
+              </Typography>
+            )}
             <Typography variant="body2">
               <strong>Party Size:</strong> {booking.partySize || 1}
             </Typography>

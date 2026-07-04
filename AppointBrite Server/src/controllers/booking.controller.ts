@@ -206,6 +206,7 @@ export const getUserBookings = async (req: Request, res: Response): Promise<void
     const bookings = await Booking.find({ customerId })
       .populate('businessId', 'name location mediaGallery category')
       .populate('serviceId', 'name durationMinutes price')
+      .populate('staffId', 'firstName lastName')
       .sort({ startTime: -1 })
       .lean();
 

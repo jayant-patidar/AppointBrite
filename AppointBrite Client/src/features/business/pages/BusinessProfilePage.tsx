@@ -73,14 +73,14 @@ export default function BusinessProfilePage() {
           {/* Sidebar (Right column on Desktop) */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ position: 'sticky', top: 100 }}>
-              <Box sx={{ mb: 4, mt: { md: -14 }, position: 'relative', zIndex: 10 }}>
+              <Box sx={{ mb: 4, position: 'relative', zIndex: 10 }}>
                 <Button
                   variant="contained"
                   color="primary"
                   fullWidth
                   size="large"
                   startIcon={<EventAvailableIcon />}
-                  onClick={() => navigate(`/book/${id}`)}
+                  onClick={() => navigate(`/book/${business._id}`)}
                   sx={{
                     mb: 3,
                     py: 1.5,
@@ -102,7 +102,7 @@ export default function BusinessProfilePage() {
                 <OperatingHoursDisplay hours={business.operatingHours} />
               </Box>
               {/* Sticky Booking Widget handles its own sticky positioning on mobile/desktop */}
-              <StickyBookingWidget businessId={id || ''} businessName={business.name} />
+              <StickyBookingWidget businessId={business._id} businessName={business.name} />
             </Box>
           </Grid>
         </Grid>

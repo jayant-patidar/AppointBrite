@@ -8,6 +8,7 @@ import { bookingRouter } from './booking.routes';
 import { reviewRouter } from './review.routes';
 import { userRouter } from './user.routes';
 import { serviceRouter } from './service.routes';
+import staffRouter from './staff.routes';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/bookings', bookingRouter);
 router.use('/reviews', reviewRouter);
 router.use('/users', userRouter);
 router.use('/services', serviceRouter);
+router.use('/staff', staffRouter);
 
 export const apiRouter = router;

@@ -6,7 +6,7 @@ export interface Booking {
   customerId?: string;
   businessId: string | { _id: string, name: string, location: any, mediaGallery: string[], category: string };
   serviceId: string | { _id: string, name: string, durationMinutes: number, price: number };
-  staffId?: string;
+  staffId?: string | { _id: string, firstName: string, lastName: string };
   startTime: string;
   endTime: string;
   status: BookingStatus;
