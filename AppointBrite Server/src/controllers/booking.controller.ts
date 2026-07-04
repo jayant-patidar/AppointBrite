@@ -203,6 +203,20 @@ export const getUserBookings = async (req: Request, res: Response): Promise<void
       return;
     }
 
+    const now = new Date();
+
+    // Lazy update: Mark past confirmed bookings as COMPLETED
+    await Booking.updateMany(
+      { customerId, status: 'CONFIRMED', endTime: { $lt: now } },
+      { $set: { status: 'COMPLETED' } }
+    );
+
+    // Lazy update: Mark past pending bookings as CANCELED
+    await Booking.updateMany(
+      { customerId, status: 'PENDING', endTime: { $lt: now } },
+      { $set: { status: 'CANCELED' } }
+    );
+
     const bookings = await Booking.find({ customerId })
       .populate('businessId', 'name location mediaGallery category')
       .populate('serviceId', 'name durationMinutes price')

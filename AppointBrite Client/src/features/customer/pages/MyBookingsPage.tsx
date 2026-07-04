@@ -9,7 +9,13 @@ import { useNavigate } from 'react-router-dom';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ChatIcon from '@mui/icons-material/Chat';
-import { format, addDays, isSameDay } from 'date-fns';
+import { format, addDays, isSameDay, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi } from '@/api/endpoints/bookings.api';
@@ -128,8 +134,12 @@ export default function MyBookingsPage() {
 
   const bookings = bookingsRes?.data || [];
   
-  const upcomingBookings = bookings.filter(b => ['PENDING', 'CONFIRMED'].includes(b.status));
-  const pastBookings = bookings.filter(b => b.status === 'COMPLETED');
+  const upcomingBookings = bookings
+    .filter(b => ['PENDING', 'CONFIRMED'].includes(b.status))
+    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  const pastBookings = bookings
+    .filter(b => b.status === 'COMPLETED')
+    .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
   const canceledBookings = bookings.filter(b => ['CANCELED', 'NO_SHOW'].includes(b.status));
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -187,34 +197,109 @@ export default function MyBookingsPage() {
       ? business.mediaGallery[0]
       : getDefaultImageForCategory(business?.category);
 
-    return (
-      <Paper key={booking._id} sx={{ p: 2, mb: 2, borderRadius: 3, display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }} elevation={2}>
+    const now = new Date();
+    const startTimeDate = new Date(booking.startTime);
+    let timeLeftMsg = null;
+    let timeLeftColor: "info" | "warning" | "error" | "success" | "default" = "info";
+
+    if (booking.status === 'CONFIRMED' || booking.status === 'PENDING') {
+      if (startTimeDate > now) {
+        const d = differenceInDays(startTimeDate, now);
+        const h = differenceInHours(startTimeDate, now) % 24;
+        const m = differenceInMinutes(startTimeDate, now) % 60;
         
-        {/* Top Half: Image & Details */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+        const parts = [];
+        if (d > 0) parts.push(`${d}d`);
+        if (h > 0) parts.push(`${h}h`);
+        if (m > 0 || parts.length === 0) parts.push(`${m}m`);
+
+        timeLeftMsg = `In ${parts.join(' ')}`;
+        
+        if (d === 0) {
+          timeLeftColor = h < 4 ? "error" : "warning";
+        } else {
+          timeLeftColor = "info";
+        }
+      }
+    }
+
+    return (
+      <Paper 
+        key={booking._id} 
+        sx={{ 
+          p: 2.5, 
+          mb: 3, 
+          borderRadius: 3, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 2.5,
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': { transform: 'translateY(-2px)', boxShadow: 4 }
+        }} 
+        elevation={1}
+      >
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, alignItems: { xs: 'stretch', sm: 'center' } }}>
+          {/* Left: Image */}
           <Box 
             component="img"
             src={businessImage}
-            sx={{ width: { xs: 80, sm: 100 }, height: { xs: 80, sm: 100 }, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
+            sx={{ width: { xs: '100%', sm: 120 }, height: { xs: 140, sm: 120 }, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
           />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1rem', sm: '1.25rem' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          
+          {/* Middle: Core Details */}
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, lineHeight: 1.2 }}>
               {service?.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {business?.name} - {business?.location?.address}
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>Date:</strong> {formatInTimeZone(new Date(booking.startTime), 'America/New_York', 'MMM do, yyyy - h:mm a')}
-            </Typography>
-            {staff && (
-              <Typography variant="body2">
-                <strong>Staff:</strong> {staff.firstName} {staff.lastName}
+            <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mb: 0.5, gap: 0.5 }}>
+              <StorefrontIcon fontSize="small" />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>{business?.name}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', color: 'text.secondary', gap: 0.5 }}>
+              <LocationOnIcon fontSize="small" sx={{ mt: '2px' }} />
+              <Typography variant="body2" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {business?.location?.address}
               </Typography>
+            </Box>
+          </Box>
+
+          {/* Right: Date, Time, Staff, Party */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: { sm: 220 }, borderLeft: { sm: '1px solid' }, borderColor: { sm: 'divider' }, pl: { sm: 3 }, pt: { xs: 2, sm: 0 }, borderTop: { xs: '1px solid', sm: 'none' }, mt: { xs: 1, sm: 0 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+              <CalendarMonthIcon sx={{ color: 'primary.main', opacity: 0.9 }} />
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  {formatInTimeZone(new Date(booking.startTime), 'America/New_York', 'MMM do, yyyy')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  {formatInTimeZone(new Date(booking.startTime), 'America/New_York', 'h:mm a')}
+                </Typography>
+              </Box>
+            </Box>
+            
+            {timeLeftMsg && (
+              <Chip 
+                icon={<AccessTimeIcon fontSize="small" />}
+                label={timeLeftMsg} 
+                size="small" 
+                color={timeLeftColor} 
+                variant={timeLeftColor === 'info' ? 'outlined' : 'filled'}
+                sx={{ alignSelf: 'flex-start', fontWeight: 600, height: 26, ml: 4 }} 
+              />
             )}
-            <Typography variant="body2">
-              <strong>Party Size:</strong> {booking.partySize || 1}
-            </Typography>
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 0.5, ml: 4 }}>
+              {staff && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                  <PersonIcon fontSize="small" />
+                  <Typography variant="caption" sx={{ fontWeight: 500 }}>{staff.firstName}</Typography>
+                </Box>
+              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                <GroupIcon fontSize="small" />
+                <Typography variant="caption" sx={{ fontWeight: 500 }}>{booking.partySize || 1} Person{(booking.partySize || 1) > 1 ? 's' : ''}</Typography>
+              </Box>
+            </Box>
           </Box>
         </Box>
 
