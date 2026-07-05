@@ -4,6 +4,8 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import SpeedIcon from '@mui/icons-material/Speed';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -56,9 +58,11 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
 
         {/* Logo area */}
         <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <AutoAwesomeIcon /> AppointBrite
-          </Typography>
+          <Link to={ROUTES.HOME} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <AutoAwesomeIcon /> AppointBrite
+            </Typography>
+          </Link>
         </Box>
 
         {/* Central Motive / Tagline */}
@@ -136,11 +140,13 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
         }}
       >
         {/* Mobile Logo */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, p: 3, alignItems: 'center', gap: 1 }}>
-          <AutoAwesomeIcon color="primary" /> 
-          <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
-            AppointBrite
-          </Typography>
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, p: 3, alignItems: 'center' }}>
+          <Link to={ROUTES.HOME} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AutoAwesomeIcon color="primary" /> 
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
+              AppointBrite
+            </Typography>
+          </Link>
         </Box>
 
         <Box 

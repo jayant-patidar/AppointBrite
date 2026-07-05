@@ -67,7 +67,11 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response) {
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
+    });
     sendSuccess(res, null, 'Logout successful');
   }
 

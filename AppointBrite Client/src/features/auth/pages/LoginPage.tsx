@@ -40,13 +40,17 @@ export default function LoginPage() {
 
       <LoginForm portal={portal} />
       
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
+      <Box sx={{ mt: 4, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Typography variant="body2" color="text.secondary">
           Don't have an account?{' '}
           <MuiLink component={Link} to={ROUTES.REGISTER} sx={{ fontWeight: 600, color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
             Sign up
           </MuiLink>
         </Typography>
+        
+        <MuiLink component={Link} to={ROUTES.HOME} sx={{ fontWeight: 600, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+          Continue as guest &rarr;
+        </MuiLink>
       </Box>
     </AuthLayout>
   );
