@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { searchBusinesses, getBusinessById, getBusinessServices, getBusinessReviews, getBusinessStaff, getMyBusiness, updateMyBusiness, getBusinessCustomers, banCustomer } from '../controllers/business.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { promotionController } from '../controllers/promotion.controller';
 
 const router = Router();
 
@@ -15,5 +16,11 @@ router.get('/:id/reviews', getBusinessReviews);
 router.get('/:id/staff', getBusinessStaff);
 router.get('/:businessId/customers', authenticate, getBusinessCustomers);
 router.post('/:businessId/ban-customer', authenticate, banCustomer);
+
+// Promotions
+router.post('/:businessId/promotions', authenticate, promotionController.createPromotion);
+router.get('/:businessId/promotions', authenticate, promotionController.getPromotions);
+router.patch('/:businessId/promotions/:promotionId/toggle', authenticate, promotionController.togglePromotion);
+router.delete('/:businessId/promotions/:promotionId', authenticate, promotionController.deletePromotion);
 
 export const businessRouter = router;

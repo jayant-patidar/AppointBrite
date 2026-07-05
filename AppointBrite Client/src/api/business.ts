@@ -29,5 +29,25 @@ export const businessApi = {
   banCustomer: async (businessId: string, payload: { email?: string; phone?: string; customerId?: string; reason?: string; action: 'BAN' | 'UNBAN' }) => {
     const response = await axiosInstance.post(`/businesses/${businessId}/ban-customer`, payload);
     return response.data;
+  },
+
+  getPromotions: async (businessId: string) => {
+    const response = await axiosInstance.get(`/businesses/${businessId}/promotions`);
+    return response.data.data;
+  },
+
+  createPromotion: async (businessId: string, payload: any) => {
+    const response = await axiosInstance.post(`/businesses/${businessId}/promotions`, payload);
+    return response.data.data;
+  },
+
+  togglePromotion: async (businessId: string, promotionId: string) => {
+    const response = await axiosInstance.patch(`/businesses/${businessId}/promotions/${promotionId}/toggle`);
+    return response.data.data;
+  },
+
+  deletePromotion: async (businessId: string, promotionId: string) => {
+    const response = await axiosInstance.delete(`/businesses/${businessId}/promotions/${promotionId}`);
+    return response.data.data;
   }
 };

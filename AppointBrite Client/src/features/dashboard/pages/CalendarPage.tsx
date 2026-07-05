@@ -134,14 +134,6 @@ export default function CalendarPage() {
     calendarApi.unselect(); // clear selection
   };
 
-  if (isLoading || !business) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}><CircularProgress /></Box>;
-  }
-
-  if (error) {
-    return <Alert severity="error">Failed to load calendar.</Alert>;
-  }
-
   const { minTime, maxTime } = useMemo(() => {
     if (!business?.operatingHours) return { minTime: '06:00:00', maxTime: '23:00:00' };
 
@@ -162,6 +154,14 @@ export default function CalendarPage() {
     // Append seconds for FullCalendar format (HH:mm:ss)
     return { minTime: `${min}:00`, maxTime: `${max}:00` };
   }, [business]);
+
+  if (isLoading || !business) {
+    return <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}><CircularProgress /></Box>;
+  }
+
+  if (error) {
+    return <Alert severity="error">Failed to load calendar.</Alert>;
+  }
 
   return (
     <Box sx={{ maxWidth: 1600, mx: 'auto', pb: 8, height: 'calc(100vh - 150px)' }}>
