@@ -9,6 +9,7 @@ import { reviewRouter } from './review.routes';
 import { userRouter } from './user.routes';
 import { serviceRouter } from './service.routes';
 import staffRouter from './staff.routes';
+import analyticsRoutes from './analytics.routes';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/reviews', reviewRouter);
 router.use('/users', userRouter);
 router.use('/services', serviceRouter);
 router.use('/staff', staffRouter);
+router.use('/analytics', analyticsRoutes);
 
 export const apiRouter = router;

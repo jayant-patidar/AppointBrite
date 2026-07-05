@@ -8,7 +8,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
-import { setSidebarOpen } from '@/store/slices/uiSlice';
+import { setSidebarOpen, toggleSidebar } from '@/store/slices/uiSlice';
 import { useResponsive } from '@/hooks/useMediaQuery';
 
 const SIDEBAR_WIDTH = 260;
@@ -45,6 +45,7 @@ export default function DashboardLayout() {
             width={desktopWidth} 
             open={sidebarOpen} 
             variant="permanent"
+            onToggle={() => dispatch(toggleSidebar())}
           />
         )}
 

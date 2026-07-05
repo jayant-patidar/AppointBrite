@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getAvailability, createBooking, getUserBookings, cancelBooking, rescheduleBooking, deleteBooking } from '../controllers/booking.controller';
-import { authenticate } from '../middlewares/auth.middleware';
+import { getAvailability, createBooking, getUserBookings, cancelBooking, rescheduleBooking, deleteBooking, getBusinessBookings, updateBookingStatus } from '../controllers/booking.controller';
+import { authenticate, authorize } from '../middlewares/auth.middleware';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 
@@ -34,5 +34,9 @@ router.get('/', getUserBookings);
 router.patch('/:id/cancel', cancelBooking);
 router.patch('/:id/reschedule', rescheduleBooking);
 router.delete('/:id', deleteBooking);
+
+// Business Management routes
+router.get('/business/:businessId', authorize('BUSINESS_OWNER', 'STAFF', 'SUPER_ADMIN'), getBusinessBookings);
+router.patch('/business/:businessId/:bookingId/status', authorize('BUSINESS_OWNER', 'STAFF', 'SUPER_ADMIN'), updateBookingStatus);
 
 export const bookingRouter = router;

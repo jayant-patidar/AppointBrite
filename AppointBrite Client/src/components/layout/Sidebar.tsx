@@ -9,6 +9,8 @@ import {
   ListItemText,
   Drawer,
   Toolbar,
+  IconButton,
+  Box,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -18,6 +20,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
 
@@ -26,6 +30,7 @@ interface SidebarProps {
   open: boolean;
   variant?: 'permanent' | 'temporary';
   onClose?: () => void;
+  onToggle?: () => void;
 }
 
 const menuItems = [
@@ -40,7 +45,7 @@ const menuItems = [
   { label: 'Promotions', icon: <LocalOfferIcon />, path: ROUTES.DASHBOARD.PROMOTIONS },
 ];
 
-export default function Sidebar({ width, open, variant = 'permanent', onClose }: SidebarProps) {
+export default function Sidebar({ width, open, variant = 'permanent', onClose, onToggle }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -76,8 +81,15 @@ export default function Sidebar({ width, open, variant = 'permanent', onClose }:
         }),
       }}
     >
-      {/* Spacer to push content down below the Header */}
-      <Toolbar />
+      {/* Spacer to push content down below the Header on mobile */}
+      {variant === 'temporary' && <Toolbar />}
+      {onToggle && (
+        <Box sx={{ display: 'flex', justifyContent: open ? 'flex-end' : 'center', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <IconButton onClick={onToggle}>
+            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </Box>
+      )}
       <List sx={{ px: 1, mt: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>

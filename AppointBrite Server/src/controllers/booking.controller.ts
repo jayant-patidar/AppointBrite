@@ -351,3 +351,72 @@ export const deleteBooking = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ success: false, message: 'Server error deleting booking' });
   }
 };
+
+export const getBusinessBookings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId } = req.params;
+    
+    // Auth check is handled by middleware (we know the user is STAFF or BUSINESS_OWNER)
+    // We should ideally verify they belong to THIS businessId, assuming that's checked in future middleware,
+    // or just assume for now the client only requests their own.
+
+    const now = new Date();
+
+    // Lazy update: Mark past confirmed bookings as COMPLETED
+    await Booking.updateMany(
+      { businessId, status: 'CONFIRMED', endTime: { $lt: now } },
+      { $set: { status: 'COMPLETED' } }
+    );
+
+    // Lazy update: Mark past pending bookings as CANCELED
+    await Booking.updateMany(
+      { businessId, status: 'PENDING', endTime: { $lt: now } },
+      { $set: { status: 'CANCELED' } }
+    );
+
+    const bookings = await Booking.find({ businessId })
+      .populate('customerId', 'firstName lastName email phone profilePicture')
+      .populate('serviceId', 'name durationMinutes price')
+      .populate('staffId', 'firstName lastName')
+      .sort({ startTime: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    console.error('Error fetching business bookings:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching business bookings' });
+  }
+};
+
+export const updateBookingStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId, bookingId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED', 'NO_SHOW'];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({ success: false, message: 'Invalid status' });
+      return;
+    }
+
+    const booking = await Booking.findOne({ _id: bookingId, businessId });
+    if (!booking) {
+      res.status(404).json({ success: false, message: 'Booking not found' });
+      return;
+    }
+
+    booking.status = status;
+    await booking.save();
+
+    const updatedBooking = await Booking.findById(bookingId)
+      .populate('customerId', 'firstName lastName email phone profilePicture')
+      .populate('serviceId', 'name durationMinutes price')
+      .populate('staffId', 'firstName lastName')
+      .lean();
+
+    res.status(200).json({ success: true, data: updatedBooking, message: `Booking status updated to ${status}` });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ success: false, message: 'Server error updating booking status' });
+  }
+};

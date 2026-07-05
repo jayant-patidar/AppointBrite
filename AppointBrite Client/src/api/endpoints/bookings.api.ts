@@ -35,4 +35,14 @@ export const bookingsApi = {
     const { data } = await axiosInstance.delete(`/bookings/${id}`);
     return data;
   },
+
+  getBusinessBookings: async (businessId: string): Promise<ApiResponse<Booking[]>> => {
+    const { data } = await axiosInstance.get(`/bookings/business/${businessId}`);
+    return data;
+  },
+
+  updateBookingStatus: async (businessId: string, bookingId: string, status: string): Promise<ApiResponse<Booking>> => {
+    const { data } = await axiosInstance.patch(`/bookings/business/${businessId}/${bookingId}/status`, { status });
+    return data;
+  },
 };
