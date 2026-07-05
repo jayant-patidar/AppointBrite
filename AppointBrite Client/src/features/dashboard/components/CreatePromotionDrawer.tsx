@@ -15,9 +15,10 @@ interface CreatePromotionDrawerProps {
   onClose: () => void;
   businessId: string;
   onSuccess: () => void;
+  promotion?: any;
 }
 
-export default function CreatePromotionDrawer({ open, onClose, businessId, onSuccess }: CreatePromotionDrawerProps) {
+export default function CreatePromotionDrawer({ open, onClose, businessId, onSuccess, promotion }: CreatePromotionDrawerProps) {
   const { enqueueSnackbar } = useSnackbar();
   
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,28 @@ export default function CreatePromotionDrawer({ open, onClose, businessId, onSuc
     maxUses: '',
     validUntil: ''
   });
+
+  React.useEffect(() => {
+    if (open) {
+      if (promotion) {
+        setFormData({
+          code: promotion.code || '',
+          type: promotion.type || 'PERCENTAGE',
+          value: promotion.value || '',
+          maxUses: promotion.maxUses || '',
+          validUntil: promotion.validUntil ? new Date(promotion.validUntil).toISOString().split('T')[0] : ''
+        });
+      } else {
+        setFormData({
+          code: '',
+          type: 'PERCENTAGE',
+          value: '',
+          maxUses: '',
+          validUntil: ''
+        });
+      }
+    }
+  }, [open, promotion]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     const { name, value } = e.target;
@@ -61,20 +84,17 @@ export default function CreatePromotionDrawer({ open, onClose, businessId, onSuc
       if (formData.maxUses) payload.maxUses = Number(formData.maxUses);
       if (formData.validUntil) payload.validUntil = formData.validUntil;
 
-      await businessApi.createPromotion(businessId, payload);
-      enqueueSnackbar('Promotion created successfully!', { variant: 'success' });
+      if (promotion) {
+        await businessApi.updatePromotion(businessId, promotion._id, payload);
+        enqueueSnackbar('Promotion updated successfully!', { variant: 'success' });
+      } else {
+        await businessApi.createPromotion(businessId, payload);
+        enqueueSnackbar('Promotion created successfully!', { variant: 'success' });
+      }
       onSuccess();
       onClose();
-      // Reset form
-      setFormData({
-        code: '',
-        type: 'PERCENTAGE',
-        value: '',
-        maxUses: '',
-        validUntil: ''
-      });
     } catch (error: any) {
-      enqueueSnackbar(error.response?.data?.message || 'Failed to create promotion', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || `Failed to ${promotion ? 'update' : 'create'} promotion`, { variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -89,7 +109,7 @@ export default function CreatePromotionDrawer({ open, onClose, businessId, onSuc
     >
       <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'background.paper' }}>
         <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <AutoAwesomeIcon color="primary" /> Create Promotion
+          <AutoAwesomeIcon color="primary" /> {promotion ? 'Update' : 'Create'} Promotion
         </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
@@ -177,7 +197,7 @@ export default function CreatePromotionDrawer({ open, onClose, businessId, onSuc
           Cancel
         </Button>
         <Button variant="contained" fullWidth type="submit" onClick={handleSubmit} disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}>
-          {loading ? 'Creating...' : 'Create Promo'}
+          {loading ? (promotion ? 'Updating...' : 'Creating...') : (promotion ? 'Update Promo' : 'Create Promo')}
         </Button>
       </Box>
     </Drawer>

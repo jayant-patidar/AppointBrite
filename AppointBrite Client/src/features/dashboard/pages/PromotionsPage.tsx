@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import CreatePromotionDrawer from '../components/CreatePromotionDrawer';
 import { businessApi } from '@/api/business';
 import { useSnackbar } from 'notistack';
@@ -19,6 +20,7 @@ export default function PromotionsPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedPromotion, setSelectedPromotion] = useState<any>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
 
   const fetchPromotions = async (id: string) => {
@@ -96,7 +98,10 @@ export default function PromotionsPage() {
           variant="contained" 
           size="large" 
           startIcon={<AddIcon />}
-          onClick={() => setDrawerOpen(true)}
+          onClick={() => {
+            setSelectedPromotion(null);
+            setDrawerOpen(true);
+          }}
           sx={{ borderRadius: 8, px: 4 }}
         >
           Create Promotion
@@ -120,13 +125,16 @@ export default function PromotionsPage() {
           </Box>
           {promotions.length > 0 && (
             <Button 
-              variant="contained" 
-              startIcon={<AddIcon />}
-              onClick={() => setDrawerOpen(true)}
-              sx={{ borderRadius: 2 }}
-            >
-              New Promo
-            </Button>
+            variant="contained" 
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setSelectedPromotion(null);
+              setDrawerOpen(true);
+            }}
+            sx={{ borderRadius: 8 }}
+          >
+            Create Promotion
+          </Button>
           )}
         </Box>
 
@@ -223,7 +231,15 @@ export default function PromotionsPage() {
                       )}
                     </Stack>
 
-                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                      <Tooltip title="Edit Promotion">
+                        <IconButton size="small" color="primary" onClick={() => {
+                          setSelectedPromotion(promo);
+                          setDrawerOpen(true);
+                        }}>
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title="Delete Promotion">
                         <IconButton size="small" color="error" onClick={() => handleDelete(promo._id)}>
                           <DeleteIcon />
@@ -243,9 +259,13 @@ export default function PromotionsPage() {
       {businessId && (
         <CreatePromotionDrawer 
           open={drawerOpen} 
-          onClose={() => setDrawerOpen(false)} 
+          onClose={() => {
+            setDrawerOpen(false);
+            setSelectedPromotion(null);
+          }} 
           businessId={businessId}
           onSuccess={() => fetchPromotions(businessId)}
+          promotion={selectedPromotion}
         />
       )}
     </>

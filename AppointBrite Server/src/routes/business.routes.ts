@@ -17,10 +17,15 @@ router.get('/:id/staff', getBusinessStaff);
 router.get('/:businessId/customers', authenticate, getBusinessCustomers);
 router.post('/:businessId/ban-customer', authenticate, banCustomer);
 
-// Promotions
+// Promotions (Business Owner)
 router.post('/:businessId/promotions', authenticate, promotionController.createPromotion);
 router.get('/:businessId/promotions', authenticate, promotionController.getPromotions);
 router.patch('/:businessId/promotions/:promotionId/toggle', authenticate, promotionController.togglePromotion);
+router.put('/:businessId/promotions/:promotionId', authenticate, promotionController.updatePromotion);
 router.delete('/:businessId/promotions/:promotionId', authenticate, promotionController.deletePromotion);
+
+// Promotions (Public)
+router.get('/:businessId/active-promotions', promotionController.getActivePromotions);
+router.post('/:businessId/promotions/validate', promotionController.validatePromotion);
 
 export const businessRouter = router;

@@ -39,3 +39,15 @@ export function useBusinessReviews(id?: string) {
     enabled: !!id,
   });
 }
+
+export function useBusinessPromotions(id?: string) {
+  return useQuery({
+    queryKey: ['businessPromotions', id],
+    queryFn: async () => {
+      if (!id) throw new Error('Business ID is required');
+      const response = await businessesApi.getActivePromotions(id);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+}

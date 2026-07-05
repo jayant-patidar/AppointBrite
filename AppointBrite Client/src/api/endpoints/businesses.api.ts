@@ -71,4 +71,19 @@ export const businessesApi = {
     const { data } = await axiosInstance.get(`/businesses/${id}/availability`, { params });
     return data;
   },
+
+  getActivePromotions: async (id: string): Promise<ApiResponse<any[]>> => {
+    const { data } = await axiosInstance.get(`/businesses/${id}/active-promotions`);
+    return data;
+  },
+
+  updatePromotion: async (id: string, promotionId: string, payload: any): Promise<ApiResponse<any>> => {
+    const { data } = await axiosInstance.put(`/businesses/${id}/promotions/${promotionId}`, payload);
+    return data;
+  },
+
+  validatePromotion: async (id: string, code: string): Promise<ApiResponse<any>> => {
+    const { data } = await axiosInstance.post(`/businesses/${id}/promotions/validate`, { code });
+    return data;
+  }
 };

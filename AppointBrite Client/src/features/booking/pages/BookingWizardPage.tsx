@@ -44,6 +44,11 @@ export default function BookingWizardPage() {
     phone: '',
   });
 
+
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState('');
+
   // Queries
   const { data: businessRes, isLoading: businessLoading } = useQuery({
     queryKey: ['business', businessId],
@@ -89,6 +94,23 @@ export default function BookingWizardPage() {
     }
   });
 
+  const validatePromoMutation = useMutation({
+    mutationFn: (code: string) => businessesApi.validatePromotion(businessId!, code),
+    onSuccess: (res) => {
+      setAppliedPromo(res.data);
+      setPromoError('');
+    },
+    onError: (err: any) => {
+      setAppliedPromo(null);
+      setPromoError(err.response?.data?.message || 'Invalid promotion code');
+    }
+  });
+
+  const handleApplyPromo = () => {
+    if (!promoCodeInput.trim()) return;
+    validatePromoMutation.mutate(promoCodeInput.trim());
+  };
+
   const handleNext = () => {
     if (activeStep === 4) {
       // Submit booking
@@ -98,9 +120,10 @@ export default function BookingWizardPage() {
         staffId: selectedStaffId || undefined,
         startTime: selectedTimeSlot,
         partySize,
-        partyMembers: partySize > 1 ? partyMembers : undefined,
+        partyMembers,
+        guestDetails: user ? undefined : guestDetails,
         specialRequests,
-        guestDetails: user ? undefined : guestDetails
+        promotionCode: appliedPromo?.code
       });
     } else {
       setActiveStep((prev) => prev + 1);
@@ -126,6 +149,18 @@ export default function BookingWizardPage() {
   const availableSlots = availabilityRes?.data || [];
 
   const selectedService = services.find(s => s._id === selectedServiceId);
+
+  const subtotal = (selectedService?.price || 0) * partySize;
+  let discount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.type === 'PERCENTAGE') {
+      discount = subtotal * (appliedPromo.value / 100);
+    } else {
+      discount = appliedPromo.value;
+    }
+    if (discount > subtotal) discount = subtotal;
+  }
+  const totalCost = subtotal - discount;
 
   // Generate upcoming days based on business's maxAdvanceBookingDays setting
   const advanceDays = business?.maxAdvanceBookingDays || 30;
@@ -506,12 +541,76 @@ export default function BookingWizardPage() {
                     ))}
                   </Grid>
                 )}
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Total Estimated Cost</Typography>
-                  <Typography variant="h6" color="primary.main" sx={{ fontWeight: 800 }}>
-                    ${(selectedService?.price || 0) * partySize}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">Pay at the venue</Typography>
+                <Grid size={{ xs: 12 }}>
+                  <Divider sx={{ my: 2 }} />
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Promo Code</Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      placeholder="Enter code"
+                      value={promoCodeInput}
+                      onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                      disabled={!!appliedPromo || validatePromoMutation.isPending}
+                      error={!!promoError}
+                      helperText={promoError}
+                      sx={{ flex: 1 }}
+                    />
+                    {!appliedPromo ? (
+                      <Button 
+                        variant="outlined" 
+                        onClick={handleApplyPromo}
+                        disabled={!promoCodeInput || validatePromoMutation.isPending}
+                      >
+                        Apply
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="text" 
+                        color="error"
+                        onClick={() => {
+                          setAppliedPromo(null);
+                          setPromoCodeInput('');
+                          setPromoError('');
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </Box>
+                  {appliedPromo && (
+                    <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <CheckCircleIcon fontSize="inherit" />
+                      Promo code applied successfully!
+                    </Typography>
+                  )}
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Box sx={{ bgcolor: 'primary.50', p: 2, borderRadius: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">Subtotal</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>${subtotal.toFixed(2)}</Typography>
+                    </Box>
+                    {appliedPromo && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="success.main">Discount ({appliedPromo.code})</Typography>
+                        <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>-${discount.toFixed(2)}</Typography>
+                      </Box>
+                    )}
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Total Estimated Cost</Typography>
+                      <Typography variant="h5" color="primary.main" sx={{ fontWeight: 800 }}>
+                        ${totalCost.toFixed(2)}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'right', mt: 0.5 }}>
+                      Pay at the venue
+                    </Typography>
+                  </Box>
                 </Grid>
               </Grid>
             </Box>

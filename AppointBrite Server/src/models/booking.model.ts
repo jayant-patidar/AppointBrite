@@ -16,6 +16,8 @@ export interface IBooking extends Document {
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;
+  discountAmount?: number;
+  promotionId?: Types.ObjectId;
   notes?: string;
   
   guestDetails?: {
@@ -52,6 +54,8 @@ const bookingSchema = new Schema<IBooking>(
       default: 'PENDING',
     },
     totalAmount: { type: Number, required: true, min: 0 },
+    discountAmount: { type: Number, min: 0 },
+    promotionId: { type: Schema.Types.ObjectId, ref: 'Promotion' },
     notes: String,
     
     guestDetails: {

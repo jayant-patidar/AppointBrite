@@ -118,16 +118,31 @@ export default function BookingDetailsDrawer({ open, booking, onClose, onStatusC
           {/* Payment Info */}
           <Box>
             <Typography variant="overline" color="text.secondary">Payment</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-              <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 600 }}>
-                <AttachMoneyIcon fontSize="small" />
-                {b.totalAmount?.toLocaleString() || b.estimatedCost?.toLocaleString() || '0'}
-              </Typography>
-              <Chip 
-                label={b.paymentStatus} 
-                size="small" 
-                color={b.paymentStatus === 'COMPLETED' ? 'success' : 'default'} 
-              />
+            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2, mt: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2" color="text.secondary">Subtotal</Typography>
+                <Typography variant="body2">${((b.totalAmount || 0) + (b.discountAmount || 0)).toLocaleString()}</Typography>
+              </Box>
+              {b.discountAmount > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" color="success.main">
+                    Discount {b.promotionId?.code ? `(${b.promotionId.code})` : ''}
+                  </Typography>
+                  <Typography variant="body2" color="success.main">-${b.discountAmount.toLocaleString()}</Typography>
+                </Box>
+              )}
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 700 }}>
+                  <AttachMoneyIcon fontSize="small" />
+                  {b.totalAmount?.toLocaleString() || b.estimatedCost?.toLocaleString() || '0'}
+                </Typography>
+                <Chip 
+                  label={b.paymentStatus} 
+                  size="small" 
+                  color={b.paymentStatus === 'COMPLETED' ? 'success' : 'default'} 
+                />
+              </Box>
             </Box>
           </Box>
 

@@ -41,6 +41,11 @@ export const businessApi = {
     return response.data.data;
   },
 
+  updatePromotion: async (businessId: string, promotionId: string, payload: any) => {
+    const response = await axiosInstance.put(`/businesses/${businessId}/promotions/${promotionId}`, payload);
+    return response.data.data;
+  },
+
   togglePromotion: async (businessId: string, promotionId: string) => {
     const response = await axiosInstance.patch(`/businesses/${businessId}/promotions/${promotionId}/toggle`);
     return response.data.data;
@@ -48,6 +53,16 @@ export const businessApi = {
 
   deletePromotion: async (businessId: string, promotionId: string) => {
     const response = await axiosInstance.delete(`/businesses/${businessId}/promotions/${promotionId}`);
+    return response.data.data;
+  },
+
+  getActivePromotions: async (businessId: string) => {
+    const response = await axiosInstance.get(`/businesses/${businessId}/active-promotions`);
+    return response.data.data;
+  },
+
+  validatePromotion: async (businessId: string, code: string) => {
+    const response = await axiosInstance.post(`/businesses/${businessId}/promotions/validate`, { code });
     return response.data.data;
   }
 };

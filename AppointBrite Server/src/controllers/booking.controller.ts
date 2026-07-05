@@ -3,6 +3,7 @@ import { fromZonedTime } from 'date-fns-tz';
 import { Booking } from '../models/booking.model';
 import { Business } from '../models/business.model';
 import { Service } from '../models/service.model';
+import { Promotion } from '../models/promotion.model';
 
 /**
  * Helper function to generate time slots based on operating hours and duration.
@@ -117,7 +118,7 @@ export const getAvailability = async (req: Request, res: Response): Promise<void
 export const createBooking = async (req: Request, res: Response): Promise<void> => {
   try {
     const { 
-      businessId, serviceId, staffId, startTime, guestDetails, partySize, partyMembers, specialRequests 
+      businessId, serviceId, staffId, startTime, guestDetails, partySize, partyMembers, specialRequests, promotionCode 
     } = req.body;
     
     // Auth user if they exist
@@ -176,7 +177,31 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     // Determine initial status based on service settings
     const status = service.requiresApproval ? 'PENDING' : 'CONFIRMED';
     
-    const estimatedCost = service.price * requestedLoad;
+    let estimatedCost = service.price * requestedLoad;
+    let discountAmount = 0;
+    let appliedPromotionId = null;
+    let validPromotion = null;
+
+    if (promotionCode) {
+      validPromotion = await Promotion.findOne({ businessId, code: promotionCode.toUpperCase() });
+      if (validPromotion && validPromotion.isActive) {
+        // Validate max Uses
+        if (!validPromotion.maxUses || (validPromotion.currentUses || 0) < validPromotion.maxUses) {
+          // Calculate discount (apply to GRAND TOTAL as requested by user)
+          if (validPromotion.type === 'PERCENTAGE') {
+            discountAmount = estimatedCost * (validPromotion.value / 100);
+          } else {
+            discountAmount = validPromotion.value;
+          }
+          
+          // Ensure discount doesn't exceed total
+          if (discountAmount > estimatedCost) discountAmount = estimatedCost;
+          
+          estimatedCost -= discountAmount;
+          appliedPromotionId = validPromotion._id;
+        }
+      }
+    }
 
     const newBooking = new Booking({
       customerId,
@@ -187,8 +212,10 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       endTime: end,
       status,
       paymentStatus: 'PENDING',
-      totalAmount: estimatedCost,
-      estimatedCost,
+      totalAmount: estimatedCost, // Final discounted total
+      discountAmount,
+      promotionId: appliedPromotionId,
+      estimatedCost, // Legacy field (same as totalAmount)
       guestDetails,
       partySize: requestedLoad,
       partyMembers,
@@ -196,6 +223,14 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     });
 
     await newBooking.save();
+
+    // Increment promotion usage and revenue
+    if (validPromotion && appliedPromotionId) {
+      validPromotion.currentUses = (validPromotion.currentUses || 0) + 1;
+      // Track the final price as revenue generated
+      validPromotion.totalRevenueGenerated = (validPromotion.totalRevenueGenerated || 0) + estimatedCost;
+      await validPromotion.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -239,6 +274,7 @@ export const getUserBookings = async (req: Request, res: Response): Promise<void
       .populate('businessId', 'name location mediaGallery category')
       .populate('serviceId', 'name durationMinutes price')
       .populate('staffId', 'firstName lastName')
+      .populate('promotionId', 'code')
       .sort({ startTime: -1 })
       .lean();
 
@@ -396,6 +432,7 @@ export const getBusinessBookings = async (req: Request, res: Response): Promise<
       .populate('customerId', 'firstName lastName email phone profilePicture')
       .populate('serviceId', 'name durationMinutes price')
       .populate('staffId', 'firstName lastName')
+      .populate('promotionId', 'code')
       .sort({ startTime: -1 })
       .lean();
 

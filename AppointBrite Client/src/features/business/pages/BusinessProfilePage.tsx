@@ -11,7 +11,9 @@ import MediaGallery from '../components/MediaGallery';
 import ReviewList from '../components/ReviewList';
 import StickyBookingWidget from '../components/StickyBookingWidget';
 import BusinessDetails from '../components/BusinessDetails';
-import { useBusiness, useBusinessServices, useBusinessReviews } from '../hooks/useBusiness';
+import { useBusiness, useBusinessServices, useBusinessReviews, useBusinessPromotions } from '../hooks/useBusiness';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 
 export default function BusinessProfilePage() {
@@ -20,8 +22,9 @@ export default function BusinessProfilePage() {
   const { data: business, isLoading: isBusinessLoading, isError: isBusinessError } = useBusiness(id);
   const { data: services, isLoading: isServicesLoading } = useBusinessServices(id);
   const { data: reviews, isLoading: isReviewsLoading } = useBusinessReviews(id);
+  const { data: promotions, isLoading: isPromotionsLoading } = useBusinessPromotions(id);
 
-  const isLoading = isBusinessLoading || isServicesLoading || isReviewsLoading;
+  const isLoading = isBusinessLoading || isServicesLoading || isReviewsLoading || isPromotionsLoading;
 
   if (isLoading && (!business || !services || !reviews)) {
     return (
@@ -62,6 +65,63 @@ export default function BusinessProfilePage() {
         <Grid container spacing={4}>
           {/* Main Content (Left column on Desktop) */}
           <Grid size={{ xs: 12, md: 8 }}>
+            {/* Promotions Banner */}
+            {promotions && promotions.length > 0 && (
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocalOfferIcon color="primary" /> Active Offers
+                </Typography>
+                <Grid container spacing={2}>
+                  {promotions.map((promo: any) => (
+                    <Grid size={{ xs: 12, sm: 6 }} key={promo.code}>
+                      <Box sx={{
+                        p: 2.5,
+                        borderRadius: 3,
+                        bgcolor: 'primary.50',
+                        border: '1px solid',
+                        borderColor: 'primary.100',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 2
+                      }}>
+                        <Box>
+                          <Typography variant="h5" color="primary.main" sx={{ fontWeight: 800 }}>
+                            {promo.type === 'PERCENTAGE' ? `${promo.value}% OFF` : `$${promo.value} OFF`}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Use code at checkout
+                          </Typography>
+                        </Box>
+                        <Box sx={{
+                          px: 2, py: 1,
+                          bgcolor: 'background.paper',
+                          borderRadius: 2,
+                          border: '1px dashed',
+                          borderColor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          cursor: 'pointer',
+                          '&:hover': { bgcolor: 'primary.50' }
+                        }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(promo.code);
+                          // We could use a snackbar here, but simple alert for now
+                          alert(`Code ${promo.code} copied to clipboard!`);
+                        }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+                            {promo.code}
+                          </Typography>
+                          <ContentCopyIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            )}
+
             <ServiceMenu services={services || []} />
             <MediaGallery images={business.mediaGallery?.length ? business.mediaGallery : []} />
             <ReviewList reviews={reviews || []} />
