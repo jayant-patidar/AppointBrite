@@ -3,7 +3,7 @@
  */
 import mongoose, { Schema, type Document, type Types } from 'mongoose';
 
-export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
+export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW' | 'BLOCKED';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED';
 
 export interface IBooking extends Document {
@@ -43,7 +43,7 @@ const bookingSchema = new Schema<IBooking>(
     endTime: { type: Date, required: true },
     status: {
       type: String,
-      enum: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED', 'NO_SHOW'],
+      enum: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED', 'NO_SHOW', 'BLOCKED'],
       default: 'PENDING',
     },
     paymentStatus: {

@@ -45,4 +45,14 @@ export const bookingsApi = {
     const { data } = await axiosInstance.patch(`/bookings/business/${businessId}/${bookingId}/status`, { status });
     return data;
   },
+
+  rescheduleBusinessBooking: async (businessId: string, bookingId: string, newStartTime: string): Promise<ApiResponse<Booking>> => {
+    const { data } = await axiosInstance.patch(`/bookings/business/${businessId}/${bookingId}/reschedule`, { newStartTime });
+    return data;
+  },
+
+  blockTime: async (businessId: string, payload: { startTime: string; endTime: string; note?: string; staffId?: string }): Promise<ApiResponse<Booking>> => {
+    const { data } = await axiosInstance.post(`/bookings/business/${businessId}/block-time`, payload);
+    return data;
+  },
 };

@@ -420,3 +420,111 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
     res.status(500).json({ success: false, message: 'Server error updating booking status' });
   }
 };
+
+export const rescheduleBusinessBooking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId, bookingId } = req.params;
+    const { newStartTime } = req.body;
+
+    const booking = await Booking.findOne({ _id: bookingId, businessId });
+    if (!booking) {
+      res.status(404).json({ success: false, message: 'Booking not found' });
+      return;
+    }
+
+    if (['CANCELED', 'COMPLETED', 'NO_SHOW'].includes(booking.status)) {
+      res.status(400).json({ success: false, message: `Cannot reschedule a ${booking.status.toLowerCase()} booking` });
+      return;
+    }
+
+    // For blocked time, just update the start and end time without checking capacity
+    if (booking.status === 'BLOCKED') {
+      const start = new Date(newStartTime);
+      const diff = booking.endTime.getTime() - booking.startTime.getTime();
+      const end = new Date(start.getTime() + diff);
+      
+      booking.startTime = start;
+      booking.endTime = end;
+      await booking.save();
+      res.status(200).json({ success: true, data: booking, message: 'Blocked time rescheduled' });
+      return;
+    }
+
+    const service = await Service.findById(booking.serviceId).lean();
+    if (!service) {
+      res.status(404).json({ success: false, message: 'Service not found' });
+      return;
+    }
+
+    const totalDuration = service.durationMinutes + service.bufferMinutes;
+    const start = new Date(newStartTime);
+    const end = new Date(start.getTime() + totalDuration * 60 * 1000);
+
+    // Validate availability
+    const overlapping = await Booking.find({
+      businessId: booking.businessId,
+      _id: { $ne: booking._id },
+      status: { $in: ['PENDING', 'CONFIRMED'] },
+      startTime: { $lt: end },
+      endTime: { $gt: start }
+    });
+
+    const currentLoad = overlapping.reduce((sum, b) => sum + (b.partySize || 1), 0);
+    const requestedLoad = booking.partySize || 1;
+
+    if (currentLoad + requestedLoad > (service.capacity || 1)) {
+      res.status(400).json({ success: false, message: 'Selected time slot is not available' });
+      return;
+    }
+
+    booking.startTime = start;
+    booking.endTime = end;
+    await booking.save();
+
+    res.status(200).json({ success: true, data: booking, message: 'Booking rescheduled successfully' });
+  } catch (error) {
+    console.error('Error rescheduling business booking:', error);
+    res.status(500).json({ success: false, message: 'Server error rescheduling booking' });
+  }
+};
+
+export const blockTime = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId } = req.params;
+    const { startTime, endTime, note, staffId } = req.body;
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (start >= end) {
+      res.status(400).json({ success: false, message: 'End time must be after start time' });
+      return;
+    }
+
+    const newBooking = new Booking({
+      businessId,
+      staffId: staffId || null,
+      startTime: start,
+      endTime: end,
+      status: 'BLOCKED',
+      paymentStatus: 'COMPLETED',
+      totalAmount: 0,
+      estimatedCost: 0,
+      guestDetails: {
+        firstName: 'Blocked',
+        lastName: 'Time',
+        email: 'blocked@appointbrite.com',
+        phone: '0000000000'
+      },
+      specialRequests: note || 'Personal time or unavailable slot',
+      partySize: 1
+    });
+
+    await newBooking.save();
+
+    res.status(201).json({ success: true, data: newBooking, message: 'Time blocked successfully' });
+  } catch (error) {
+    console.error('Error blocking time:', error);
+    res.status(500).json({ success: false, message: 'Server error blocking time' });
+  }
+};
