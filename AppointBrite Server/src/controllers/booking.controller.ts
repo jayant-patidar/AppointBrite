@@ -128,6 +128,24 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
+    const business = await Business.findById(businessId).lean();
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found.' });
+      return;
+    }
+
+    const isBanned = business.bannedCustomers?.some(b => 
+      (customerId && b.customerId?.toString() === customerId) ||
+      (guestDetails?.email && b.email === guestDetails.email) ||
+      (guestDetails?.phone && b.phone === guestDetails.phone) ||
+      ((req as any).user?.email && b.email === (req as any).user?.email)
+    );
+
+    if (isBanned) {
+      res.status(403).json({ success: false, message: 'You are not permitted to book with this business.' });
+      return;
+    }
+
     const service = await Service.findById(serviceId).lean();
     if (!service) {
       res.status(404).json({ success: false, message: 'Service not found.' });

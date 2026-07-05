@@ -3,6 +3,8 @@ import { Business } from '../models/business.model';
 import { Service } from '../models/service.model';
 import { Review } from '../models/review.model';
 import { Staff } from '../models/staff.model';
+import { Booking } from '../models/booking.model';
+import mongoose from 'mongoose';
 
 /**
  * @route   GET /api/v1/businesses
@@ -165,5 +167,137 @@ export const updateMyBusiness = async (req: Request, res: Response): Promise<voi
     res.status(200).json({ success: true, data: business });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message || 'Server Error updating business profile' });
+  }
+};
+
+/**
+ * @route   GET /api/v1/businesses/:businessId/customers
+ * @desc    Get all unique customers for a business
+ * @access  Private (Business Owner / Staff)
+ */
+export const getBusinessCustomers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId } = req.params;
+
+    // Use aggregation to group bookings by customer
+    const customers = await Booking.aggregate([
+      { $match: { businessId: new mongoose.Types.ObjectId(businessId as string) } },
+      {
+        $group: {
+          _id: {
+            customerId: '$customerId',
+            guestEmail: '$guestDetails.email'
+          },
+          totalBookings: { $sum: 1 },
+          totalRevenue: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['COMPLETED', 'CONFIRMED']] }, '$totalAmount', 0]
+            }
+          },
+          lastVisitDate: { $max: '$startTime' },
+          customerId: { $first: '$customerId' },
+          guestDetails: { $first: '$guestDetails' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'customerId',
+          foreignField: '_id',
+          as: 'customerInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$customerInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          customerId: 1,
+          isGuest: { $cond: [{ $ifNull: ['$customerId', false] }, false, true] },
+          firstName: { $ifNull: ['$customerInfo.firstName', '$guestDetails.firstName'] },
+          lastName: { $ifNull: ['$customerInfo.lastName', '$guestDetails.lastName'] },
+          email: { $ifNull: ['$customerInfo.email', '$guestDetails.email'] },
+          phone: { $ifNull: ['$customerInfo.phone', '$guestDetails.phone'] },
+          totalBookings: 1,
+          totalRevenue: 1,
+          lastVisitDate: 1
+        }
+      },
+      { $sort: { totalRevenue: -1 } }
+    ]);
+
+    const business = await Business.findById(businessId).select('bannedCustomers').lean();
+    const bannedCustomers = business?.bannedCustomers || [];
+
+    const customersWithBanStatus = customers.map(c => {
+      const isBanned = bannedCustomers.some(b => 
+        (c.email && b.email === c.email) || 
+        (c.phone && b.phone === c.phone) || 
+        (c.customerId && b.customerId?.toString() === c.customerId.toString())
+      );
+      return { ...c, isBanned };
+    });
+
+    res.status(200).json({ success: true, data: customersWithBanStatus });
+  } catch (error: any) {
+    console.error('Error fetching business customers:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching customers' });
+  }
+};
+
+/**
+ * @route   POST /api/v1/businesses/:businessId/ban-customer
+ * @desc    Ban or unban a customer from booking
+ * @access  Private (Business Owner / Staff)
+ */
+export const banCustomer = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { businessId } = req.params;
+    const { email, phone, customerId, reason, action } = req.body; // action: 'BAN' | 'UNBAN'
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found' });
+      return;
+    }
+
+    if (!business.bannedCustomers) {
+      business.bannedCustomers = [];
+    }
+
+    if (action === 'BAN') {
+      const alreadyBanned = business.bannedCustomers.some(b => 
+        (email && b.email === email) || 
+        (phone && b.phone === phone) || 
+        (customerId && b.customerId?.toString() === customerId)
+      );
+
+      if (!alreadyBanned) {
+        business.bannedCustomers.push({
+          email,
+          phone,
+          customerId: customerId || undefined,
+          reason,
+          bannedAt: new Date()
+        });
+      }
+    } else if (action === 'UNBAN') {
+      business.bannedCustomers = business.bannedCustomers.filter(b => 
+        !((email && b.email === email) || 
+          (phone && b.phone === phone) || 
+          (customerId && b.customerId?.toString() === customerId))
+      );
+    }
+
+    await business.save();
+
+    res.status(200).json({ success: true, message: `Customer ${action === 'BAN' ? 'banned' : 'unbanned'} successfully.` });
+  } catch (error: any) {
+    console.error('Error banning customer:', error);
+    res.status(500).json({ success: false, message: 'Server error updating ban status' });
   }
 };

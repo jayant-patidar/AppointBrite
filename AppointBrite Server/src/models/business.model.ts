@@ -91,6 +91,13 @@ export interface IBusiness extends Document {
     googleMyBusiness?: string;
   };
   amenities?: string[];
+  bannedCustomers?: {
+    email?: string;
+    phone?: string;
+    customerId?: Types.ObjectId;
+    reason?: string;
+    bannedAt: Date;
+  }[];
   isActive: boolean;
   onboardingStep: number;
   createdAt: Date;
@@ -198,6 +205,15 @@ const businessSchema = new Schema<IBusiness>(
       googleMyBusiness: { type: String },
     },
     amenities: [{ type: String }],
+    bannedCustomers: [
+      {
+        email: { type: String },
+        phone: { type: String },
+        customerId: { type: Schema.Types.ObjectId, ref: 'User' },
+        reason: { type: String },
+        bannedAt: { type: Date, default: Date.now },
+      }
+    ],
     isActive: { type: Boolean, default: false }, // Should be false until onboarding is complete or verified
     onboardingStep: { type: Number, default: 1 },
   },
