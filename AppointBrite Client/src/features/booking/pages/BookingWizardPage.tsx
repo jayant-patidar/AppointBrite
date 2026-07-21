@@ -35,7 +35,7 @@ export default function BookingWizardPage() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(''); // ISO string
   const [selectedStaffId, setSelectedStaffId] = useState<string>(prefillStaffId || ''); // empty means "Any Available"
   const [partySize, setPartySize] = useState<number>(1);
-  const [partyMembers, setPartyMembers] = useState([{ name: '', phone: '' }]);
+  const [partyMembers, setPartyMembers] = useState<{name: string, phone: string}[]>([]);
   const [specialRequests, setSpecialRequests] = useState<string>('');
   const [guestDetails, setGuestDetails] = useState({
     firstName: user?.firstName || '',
@@ -418,7 +418,9 @@ export default function BookingWizardPage() {
                         onClick={() => {
                           const num = Math.max(1, partySize - 1);
                           setPartySize(num);
-                          setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
+                          if (partyMembers.length > num - 1) {
+                            setPartyMembers(prev => prev.slice(0, num - 1));
+                          }
                         }}
                         disabled={partySize <= 1}
                         sx={{ bgcolor: 'action.hover' }}
@@ -435,7 +437,6 @@ export default function BookingWizardPage() {
                           const maxCap = selectedService?.capacity || 1;
                           const num = Math.min(maxCap, partySize + 1);
                           setPartySize(num);
-                          setPartyMembers(Array.from({ length: num }).map((_, i) => partyMembers[i] || { name: '', phone: '' }));
                         }}
                         disabled={partySize >= (selectedService?.capacity || 1)}
                         sx={{ bgcolor: 'action.hover' }}
@@ -452,10 +453,20 @@ export default function BookingWizardPage() {
                   </Box>
                   {partySize > 1 && (
                     <Box sx={{ pl: 2, borderLeft: '2px solid', borderColor: 'primary.main', mb: 2 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>Party Member Details (Optional)</Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>Party Member Details (Optional)</Typography>
+                        <Button 
+                          size="small" 
+                          startIcon={<AddIcon />} 
+                          onClick={() => setPartyMembers([...partyMembers, { name: '', phone: '' }])}
+                          disabled={partyMembers.length >= partySize - 1}
+                        >
+                          Add Member
+                        </Button>
+                      </Box>
                       {partyMembers.map((member, i) => (
-                        <Grid container spacing={2} sx={{ mb: 2 }} key={i}>
-                          <Grid size={{ xs: 12, sm: 6 }}>
+                        <Grid container spacing={2} sx={{ mb: 2, alignItems: 'center' }} key={i}>
+                          <Grid size={{ xs: 12, sm: 5 }}>
                             <TextField 
                               fullWidth size="small" label={`Member ${i + 1} Name`}
                               value={member.name}
@@ -466,7 +477,7 @@ export default function BookingWizardPage() {
                               }}
                             />
                           </Grid>
-                          <Grid size={{ xs: 12, sm: 6 }}>
+                          <Grid size={{ xs: 12, sm: 5 }}>
                             <TextField 
                               fullWidth size="small" label={`Member ${i + 1} Phone`}
                               value={member.phone}
@@ -476,6 +487,19 @@ export default function BookingWizardPage() {
                                 setPartyMembers(newMembers);
                               }}
                             />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 2 }}>
+                            <IconButton 
+                              color="error"
+                              size="small"
+                              onClick={() => {
+                                const newMembers = [...partyMembers];
+                                newMembers.splice(i, 1);
+                                setPartyMembers(newMembers);
+                              }}
+                            >
+                              <RemoveIcon />
+                            </IconButton>
                           </Grid>
                         </Grid>
                       ))}
